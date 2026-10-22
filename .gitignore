@@ -1,0 +1,5 @@
+node_modules
+dist
+*.tsbuildinfo
+# Données de la ferme : jamais dans le dépôt public (importées une fois depuis l'application)
+src/data/historique.json
