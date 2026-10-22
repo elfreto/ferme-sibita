@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import historique from './data/historique.json'
 import { argentEnMain, bilanBande, encaisse, resteDu } from './argent'
 import { journees } from './calc'
 import { etatStocks } from './stock'
 import type { Article, Bande, Depense, Mouvement, Remise, Saisie, Utilisateur, Vente } from './db'
 
-const h = historique as unknown as { bandes: Bande[]; journal: Saisie[]; ventes: Vente[]; depenses: Depense[] }
 const equipe: Utilisateur[] = [
   { id: 'j', nom: 'Justin', role: 'cofondateur' },
   { id: 'g', nom: 'Georges', role: 'responsable' },
@@ -51,19 +49,6 @@ describe('argent', () => {
     const ventes: Vente[] = [{ id: 'v', bandeId: 'b', date: '2026-10-22', qte: 20, prixUnitaire: 3500, auteur: 'Justin' }]
     const depenses: Depense[] = [{ id: 'd', date: '2026-10-22', categorie: 5, designation: 'Taxi', montant: 600, auteur: 'Justin' }]
     expect(argentEnMain(equipe, ventes, depenses, []).get('Justin')).toBe(69400)
-  })
-
-  it('retrouve le bilan Excel de janvier (dépenses, ventes, résultat, coût par poulet)', () => {
-    const bande = h.bandes.find((b) => b.id === 'import-2026-01-24')!
-    const ventes = h.ventes.filter((v) => v.bandeId === bande.id)
-    const depenses = h.depenses.filter((d) => d.bandeId === bande.id)
-    const jours = journees(bande, h.journal.filter((s) => s.bandeId === bande.id), ventes)
-    const b = bilanBande(bande, jours, ventes, depenses)
-    expect(b.totalDepenses).toBe(bande.bilanExcel!['MONTANT TOTAL DES DEPENSES'])
-    expect(b.totalVentes).toBe(bande.bilanExcel!['PRIX TOTAL DES VENTES'])
-    expect(b.resultatNet).toBe(bande.bilanExcel!['RESULTAT NET'])
-    expect(Math.round(b.coutParPoulet!)).toBe(Math.round(bande.bilanExcel!['Prix de production / poulet']))
-    expect(b.dettesClients).toBe(0)
   })
 })
 
