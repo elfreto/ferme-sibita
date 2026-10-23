@@ -1,3 +1,4 @@
+import { corrigerRation180 } from './corrections'
 import { useEffect, useState } from 'react'
 import { LIBELLE_ROLE, initialiser, type Mouvement, type Utilisateur } from './db'
 import Equipe from './screens/Equipe'
@@ -44,7 +45,7 @@ export default function App() {
 
   useEffect(() => {
     const session = supabase ? supabase.auth.getSession().then(({ data }) => setFermeReliee(!!data.session)) : Promise.resolve()
-    Promise.all([initialiser(), session])
+    Promise.all([initialiser().then(() => (synchroActive ? undefined : corrigerRation180())), session])
       .then(utilisateurMemorise)
       .then((u) => setUtilisateur(u ?? null))
       .finally(() => setPret(true))

@@ -80,6 +80,8 @@ export interface Saisie {
   source?: 'terrain' | 'excel'
   /** Article de stock d'où vient l'aliment (sinon le premier aliment du stock) */
   alimentArticleId?: string
+  /** Aliment recalculé de 183 g à 180 g par poulet (jours après J42 saisis avant le 23/10/2026) */
+  ration180?: true
   /** Corrections faites par un co-founder ou un responsable : anciennes valeurs, qui et quand */
   modifications?: { le: string; par: string; avant: Partial<Saisie> }[]
 }
