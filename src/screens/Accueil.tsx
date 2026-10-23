@@ -8,7 +8,7 @@ import { useDonnees } from '../hooks'
 import { argentEnMain, resteDu, totalVente } from '../argent'
 import { estStockBas, etatStocks } from '../stock'
 import { fcfa } from '../calc'
-import { voitLesBilans } from '../db'
+import { peutGerer, voitLesBilans } from '../db'
 
 /** Les chiffres qui demandent une action : argent à récupérer, dettes, stock bas, résultat en cours. */
 function TableauDeBord({ naviguer }: { naviguer: Naviguer }) {
@@ -59,6 +59,11 @@ function TableauDeBord({ naviguer }: { naviguer: Naviguer }) {
       <button onClick={() => naviguer({ nom: 'bandes' })}>
         <strong className={resultat < 0 ? 'rouge' : ''}>{fcfa(resultat)}</strong><span>ventes − dépenses des bandes en cours</span>
       </button>
+      {peutGerer(u) && (
+        <button onClick={() => naviguer({ nom: 'annuel' })}>
+          <strong>Année {aujourdhui().slice(0, 4)}</strong><span>tableau de bord annuel</span>
+        </button>
+      )}
     </div>
   )
 }

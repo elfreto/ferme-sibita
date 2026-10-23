@@ -249,3 +249,8 @@ button.lien.neutre { color: var(--vert); }
 .bilan div.bilan-resultat dt, .bilan div.bilan-resultat dd { color: #3498DB; }
 .bilan div.bilan-separation { display: block; margin-top: 2.4em; padding-top: 10px; border-top: 1px solid var(--bord, #d9d4c7); }
 .bilan div.bilan-separation span { font-weight: 700; font-size: 15px; color: var(--texte, inherit); }
+.graphique .barre-resultat { cursor: pointer; }
+.graphique .barre-resultat.positif path { fill: #3498DB; }
+.graphique .barre-resultat.negatif path { fill: #E74C3C; }
+.graphique .barre-resultat.choisie path { stroke: var(--texte); stroke-width: 1.5; }
+.graphique .barre-resultat text.valeur { font-weight: 700; fill: var(--texte); }
