@@ -33,6 +33,8 @@ export interface Jour {
   vendus: number
   vivants: number // en fin de journée, après morts et ventes
   alimentKg?: number
+  /** Aliment du jour = ration × vivants (colonne « Aliment ») ; absent pour un jour non saisi */
+  aliment?: number
   gParSujet?: number
   ration: number
   poidsMoyenKg?: number
@@ -88,6 +90,7 @@ export function journees(bande: Bande, saisies: Saisie[], ventes: Vente[], date 
       alimentKg: kg || undefined,
       gParSujet: kg ? gramme(kg, avant - morts) : undefined,
       ration: rationPrevue(a),
+      aliment: duJour.length ? alimentPrevuKg(a, vivants) : undefined,
       poidsMoyenKg: pesees.length ? pesees[pesees.length - 1].poidsMoyenKg : undefined,
       traitements: duJour.map((s) => s.traitement).filter((t): t is string => !!t),
       notes: duJour.map((s) => s.note).filter((t): t is string => !!t),
@@ -124,7 +127,8 @@ export function resume(bande: Bande, jours: Jour[], date = aujourdhui()): Resume
   const mortsTotal = jours.reduce((t, j) => t + j.morts, 0)
   const vendusTotal = jours.reduce((t, j) => t + j.vendus, 0)
   const vivants = bande.poussins - mortsTotal - vendusTotal
-  const alimentTotalKg = jours.reduce((t, j) => t + (j.alimentKg ?? 0), 0)
+  // Aliment donné = somme de la colonne « Aliment »
+  const alimentTotalKg = Math.round(jours.reduce((t, j) => t + (j.aliment ?? 0), 0) * 10) / 10
   const pese = [...jours].reverse().find((j) => j.poidsMoyenKg)
   const finAge = bande.statut === 'cloturee' && jours.length ? jours[jours.length - 1].age : age(bande.dateReception, date)
   // Indice de consommation : kg d'aliment pour 1 kg de poids vif produit
@@ -152,4 +156,17 @@ export function dateCourte(iso: string) {
 }
 export function dateLongue(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/**
+ * Aliment retiré du stock : pour chaque jour saisi sur le terrain, le même chiffre que la colonne « Aliment »
+ * (ration × vivants), daté comme la première saisie du jour.
+ */
+export function consommations(bandes: Bande[], saisies: Saisie[], ventes: Vente[]): { date: string; creeLe?: string; alimentKg: number }[] {
+  return bandes.flatMap((b) => {
+    const jours = journees(b, saisies.filter((s) => s.bandeId === b.id), ventes.filter((v) => v.bandeId === b.id))
+    return jours
+      .filter((j) => j.aliment && j.saisies.some((s) => s.source !== 'excel'))
+      .map((j) => ({ date: j.date, creeLe: j.saisies.map((s) => s.creeLe ?? '').sort()[0] || undefined, alimentKg: j.aliment! }))
+  })
 }

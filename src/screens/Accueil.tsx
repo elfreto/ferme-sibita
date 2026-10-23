@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ACCES_ROLE, LIBELLE_ROLE, db, dirigeLesBandes, peutSaisir } from '../db'
-import { aujourdhui, dateLongue, nombre, pourcent } from '../calc'
+import { aujourdhui, consommations, dateLongue, nombre, pourcent } from '../calc'
 import { useBande } from '../hooks'
 import { useUtilisateur } from '../session'
 import type { Naviguer } from '../App'
@@ -16,7 +16,7 @@ function TableauDeBord({ naviguer }: { naviguer: Naviguer }) {
   const u = useUtilisateur()
   if (!d) return null
   const enMain = argentEnMain(d.utilisateurs, d.ventes, d.depenses, d.remises)
-  const stocks = etatStocks(d.articles, d.mouvements, d.saisies)
+  const stocks = etatStocks(d.articles, d.mouvements, consommations(d.bandes, d.saisies, d.ventes))
   const stockBas = d.articles.filter((a) => estStockBas(a, stocks.get(a.id) ?? 0, d.mouvements))
   const aConfirmer = d.remises.filter((r) => r.statut === 'en_attente' && r.a === u.nom)
   const alerte = aConfirmer.length > 0 && (

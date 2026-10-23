@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { age, gramme, journees, rationPrevue, resume } from './calc'
+import { age, consommations, gramme, journees, rationPrevue, resume } from './calc'
 import type { Bande, Saisie, Vente } from './db'
 
 describe('calculs', () => {
@@ -49,5 +49,17 @@ describe('calculs', () => {
     const [j1, j2] = journees(bande, s, [], '2026-10-02')
     expect(j1.rouge).toEqual({ morts: true, aliment: false, poids: false })
     expect(j2.rouge.aliment).toBe(true)
+  })
+})
+
+describe('aliment donné', () => {
+  it('est la somme de la colonne Aliment (ration × vivants)', () => {
+    const b: Bande = { id: 'x', nom: 'X', espace: 1, dateReception: '2026-01-01', poussins: 1000, statut: 'en_cours' }
+    const s = (date: string, morts: number, alimentKg?: number): Saisie => ({ id: date, bandeId: 'x', date, morts, alimentKg, source: 'terrain', creeLe: date + 'T08:00' })
+    const jours = journees(b, [s('2026-01-01', 10, 25), s('2026-01-02', 5, 99), s('2026-01-03', 0)], [], '2026-01-04')
+    const colonne = jours.map((j) => j.aliment ?? 0)
+    expect(colonne).toEqual([24.8, 24.6, 24.6, 0])
+    expect(resume(b, jours, '2026-01-04').alimentTotalKg).toBe(74)
+    expect(consommations([b], [s('2026-01-01', 10, 25)], []).map((c) => c.alimentKg)).toEqual([24.8])
   })
 })

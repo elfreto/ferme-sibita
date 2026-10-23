@@ -57,7 +57,7 @@ describe('stock', () => {
   const articles = [art('provende-spc', 'SPC'), art('aliment-fini', 'Maison'), art('mais', 'Maïs')]
   const mvt = (articleId: string, sens: Mouvement['sens'], quantite: number, date: string, creeLe = date + 'T08:00'): Mouvement =>
     ({ id: articleId + sens + date + quantite, articleId, sens, quantite, date, auteur: 'x', creeLe })
-  const jour = (date: string, kg: number): Saisie => ({ id: date, bandeId: 'b', date, alimentKg: kg, creeLe: date + 'T09:00' })
+  const jour = (date: string, kg: number) => ({ date, alimentKg: kg, creeLe: date + 'T09:00' })
 
   it("retire l'aliment de la SPC d'abord, puis de la provende maison", () => {
     const m = [mvt('provende-spc', 'entree', 2, '2026-10-20'), mvt('aliment-fini', 'entree', 10, '2026-10-20')]

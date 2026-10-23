@@ -108,7 +108,7 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
         <div><strong>{nombre(r.vivants)}</strong><span>{bande.statut === 'cloturee' ? 'non vendus' : 'restants'}</span></div>
         <div><strong>{nombre(r.mortsTotal)}</strong><span>morts · {pourcent(r.tauxMortalite)}</span></div>
         <div><strong>{nombre(r.vendusTotal)}</strong><span>vendus</span></div>
-        <div><strong>{nombre(r.alimentTotalKg)} kg</strong><span>aliment donné</span></div>
+        <div><strong>{nombre(r.alimentTotalKg, 1)} kg</strong><span>aliment donné</span></div>
         <div>
           <strong>{r.indiceConso ? nombre(r.indiceConso, 2) : '—'}</strong>
           <span>{r.indiceConso ? 'indice de conso.' : 'indice : peser les poulets'}</span>
@@ -215,7 +215,7 @@ function LigneJour({ j, ouvert, onClic, onSupprimer, onModifier, onRattraper }: 
         <td>{dateCourte(j.date)} <small>J{j.age}</small></td>
         <td className={j.rouge.morts ? 'rouge' : j.morts ? 'fort' : ''}>{j.morts || '·'}</td>
         <td>{nombre(j.vivants)}{j.vendus > 0 && <small className="vendus"> −{j.vendus} vendus</small>}</td>
-        <td>{nombre(alimentPrevuKg(j.age, j.vivants), 1)} kg</td>
+        <td>{nombre(j.aliment ?? 0, 1)} kg</td>
         <td>{j.ration}</td>
       </tr>
       {ouvert && (
@@ -224,7 +224,6 @@ function LigneJour({ j, ouvert, onClic, onSupprimer, onModifier, onRattraper }: 
             {j.poidsMoyenKg && <p className={j.rouge.poids ? 'rouge' : ''}>Poids moyen : {nombre(j.poidsMoyenKg, 2)} kg</p>}
             {j.vendus > 0 && <p>{j.vendus} poulet{j.vendus > 1 ? 's' : ''} vendu{j.vendus > 1 ? 's' : ''}</p>}
             <p>Ration prévue : {j.ration} g par poulet, soit {nombre(alimentPrevuKg(j.age, j.vivants), 1)} kg pour {nombre(j.vivants)} vivants</p>
-            {j.alimentKg !== undefined && <p className={j.rouge.aliment ? 'rouge' : ''}>Aliment compté : {nombre(j.alimentKg, 1)} kg</p>}
             <ul className="liste-saisies">
               {j.saisies.map((s) => (
                 <li key={s.id}>

@@ -1,4 +1,4 @@
-import type { Article, Mouvement, Saisie } from './db'
+import type { Article, Mouvement } from './db'
 
 export const PROVENDE_SPC = 'provende-spc'
 export const PROVENDE_MAISON = 'aliment-fini' // ancien « Aliment fini », même identifiant pour garder son historique
@@ -25,17 +25,17 @@ type Evenement = { cle: string; mouvement?: Mouvement; kg?: number }
 /**
  * Stock de chaque article, en rejouant les opérations dans l'ordre :
  * - un inventaire remet le compte au nombre compté ;
- * - l'aliment donné chaque jour (kg) est retiré d'abord de la Provende SPC,
+ * - l'aliment donné chaque jour (kg, voir consommations) est retiré d'abord de la Provende SPC,
  *   puis, quand elle est épuisée, de la Provende maison ;
  * - chaque entrée de Provende maison retire 1 sac de maïs pour 3 sacs entrés (15 sacs → 5 sacs de maïs).
  */
-export function etatStocks(articles: Article[], mouvements: Mouvement[], saisies: Saisie[]): Map<string, number> {
+export function etatStocks(articles: Article[], mouvements: Mouvement[], consommations: { date: string; creeLe?: string; alimentKg: number }[]): Map<string, number> {
   const q = new Map<string, number>(articles.map((a) => [a.id, 0]))
   const ajouter = (id: string, n: number) => q.set(id, (q.get(id) ?? 0) + n)
   const poids = (id: string) => articles.find((a) => a.id === id)?.poidsSacKg ?? POIDS_SAC_DEFAUT
   const evenements: Evenement[] = [
     ...mouvements.map((m) => ({ cle: cle(m.date, m.creeLe), mouvement: m })),
-    ...saisies.filter((s) => s.source !== 'excel' && s.alimentKg).map((s) => ({ cle: cle(s.date, s.creeLe), kg: s.alimentKg })),
+    ...consommations.map((c) => ({ cle: cle(c.date, c.creeLe), kg: c.alimentKg })),
   ].sort((a, b) => a.cle.localeCompare(b.cle))
 
   for (const e of evenements) {

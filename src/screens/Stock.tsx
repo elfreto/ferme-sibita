@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { enregistrer, nouvelId, payeeAvecVentes, peutGerer, peutSaisir, supprimer, type Categorie, type Mouvement, type TypeArticle } from '../db'
-import { aujourdhui, dateCourte, fcfa, nombre } from '../calc'
+import { aujourdhui, consommations, dateCourte, fcfa, nombre } from '../calc'
 import { useDonnees } from '../hooks'
 import { argentEnMain } from '../argent'
 import { estStockBas, etatStocks, MAIS, seuilAlerte, PROVENDE_MAISON, PROVENDE_SPC, SACS_MAISON_PAR_SAC_MAIS } from '../stock'
@@ -24,7 +24,7 @@ export default function Stock({ naviguer }: { naviguer: Naviguer }) {
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [aSupprimer, setASupprimer] = useState<Mouvement | null>(null)
   if (!d) return null
-  const stocks = etatStocks(d.articles, d.mouvements, d.saisies)
+  const stocks = etatStocks(d.articles, d.mouvements, consommations(d.bandes, d.saisies, d.ventes))
   const gestion = peutGerer(u)
   return (
     <div className="pile">
@@ -162,7 +162,7 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
   if (!d) return null
   const a = d.articles.find((x) => x.id === articleId)
   if (!a) return <p>Article introuvable.</p>
-  const actuel = etatStocks(d.articles, d.mouvements, d.saisies).get(a.id) ?? 0
+  const actuel = etatStocks(d.articles, d.mouvements, consommations(d.bandes, d.saisies, d.ventes)).get(a.id) ?? 0
   const fabrication = sens === 'entree' && a.id === PROVENDE_MAISON
   const caseVentes = sens === 'entree' && (a.id === PROVENDE_SPC || a.id === MAIS)
   const enCours = d.bandes.filter((b) => b.statut === 'en_cours')
