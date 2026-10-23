@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { CATEGORIES, apresCloture, cloturerBande, dirigeLesBandes, enregistrer, peutGerer, peutSaisir, supprimer, supprimerBande, voitLesBilans, type Categorie } from '../db'
+import { CATEGORIES, apresCloture, cloturerBande, db, dirigeLesBandes, enregistrer, peutGerer, peutSaisir, supprimer, supprimerBande, voitLesBilans, type Categorie } from '../db'
 import { MOIS } from './NouvelleBande'
 import type { Bilan } from '../argent'
 import { alimentPrevuKg, aujourdhui, journees, dateCourte, dateLongue, fcfa, nombre, pourcent, type Jour } from '../calc'
@@ -15,7 +15,7 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
   const data = useBande(bandeId)
   const u = useUtilisateur()
   const [ouvert, setOuvert] = useState<string | null>(null)
-  const [demande, setDemande] = useState<{ message: string; action: () => Promise<void>; titre?: string; bouton?: string } | null>(null)
+  const [demande, setDemande] = useState<{ message: string; action: () => Promise<void>; titre?: string; bouton?: string; douce?: boolean } | null>(null)
   const [nouvelleDate, setNouvelleDate] = useState<string | null>(null)
   const [erreurDate, setErreurDate] = useState('')
   const [dateFin, setDateFin] = useState<string | null>(null)
@@ -48,6 +48,23 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
         await cloturerBande(bande, fin)
         setDateFin(null)
         naviguer({ nom: 'accueil' })
+      },
+    })
+  }
+  async function rouvrir() {
+    const occupe = (await db.bandes.toArray()).find((b) => b.id !== bande.id && b.statut === 'en_cours' && b.espace === bande.espace)
+    if (occupe) {
+      setDemande({ titre: 'Impossible de rouvrir', message: `L'espace ${bande.espace} a déjà une bande en cours (${occupe.nom}). Clôturez-la d'abord.`, bouton: 'Compris', douce: true, action: async () => {} })
+      return
+    }
+    setDemande({
+      titre: 'Rouvrir la bande ?',
+      message: `${bande.nom} redeviendra « en cours » et réapparaîtra à l'accueil. Les jours depuis sa clôture devront être saisis ou rattrapés.`,
+      bouton: 'Oui, rouvrir',
+      douce: true,
+      action: async () => {
+        const { dateCloture: _fin, ...reste } = bande
+        await enregistrer('bandes', { ...reste, statut: 'en_cours' })
       },
     })
   }
@@ -154,7 +171,10 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
       {dirigeLesBandes(u) && dateFin === null && (
         bande.statut === 'en_cours'
           ? <button className="danger" onClick={() => setDateFin(aujourdhui())}>Clôturer la bande</button>
-          : <button onClick={() => setDateFin(bande.dateCloture ?? aujourdhui())}>Changer la date de clôture</button>
+          : <>
+              <button className="secondaire" onClick={rouvrir}>Rouvrir la bande</button>
+              <button onClick={() => setDateFin(bande.dateCloture ?? aujourdhui())}>Changer la date de clôture</button>
+            </>
       )}
       {dateFin !== null && (
         <div className="carte pile">
@@ -173,7 +193,7 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
         <button className="danger" onClick={supprimerLaBande}>Supprimer la bande</button>
       )}
       {demande && (
-        <div className={`confirmer ${demande.bouton ? 'danger' : ''}`} role="alertdialog">
+        <div className={`confirmer ${demande.bouton && !demande.douce ? 'danger' : ''}`} role="alertdialog">
           {demande.titre && <h3>{demande.titre}</h3>}
           <p>{demande.message}</p>
           <div className="segments">
