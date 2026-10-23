@@ -303,6 +303,24 @@ export async function supprimerBande(bandeId: string) {
   await supprimer('bandes', bandeId)
 }
 
+/** Clôture une bande à la date choisie : les saisies, ventes et dépenses de la bande après cette date sont supprimées. */
+export async function apresCloture(bandeId: string, date: string) {
+  const [saisies, ventes, depenses] = await Promise.all([
+    db.journal.where('bandeId').equals(bandeId).filter((s) => s.date > date).toArray(),
+    db.ventes.where('bandeId').equals(bandeId).filter((v) => v.date > date).toArray(),
+    db.depenses.where('bandeId').equals(bandeId).filter((d) => d.date > date).toArray(),
+  ])
+  return { saisies, ventes, depenses }
+}
+
+export async function cloturerBande(bande: Bande, date: string) {
+  const { saisies, ventes, depenses } = await apresCloture(bande.id, date)
+  for (const s of saisies) await supprimer('journal', s.id)
+  for (const v of ventes) await supprimer('ventes', v.id)
+  for (const d of depenses) await supprimer('depenses', d.id)
+  await enregistrer('bandes', { ...bande, statut: 'cloturee', dateCloture: date })
+}
+
 export type Historique = { bandes: Bande[]; journal: (Saisie & { age?: number })[]; ventes: Vente[]; depenses: Depense[] }
 
 /** Met en forme les bandes, saisies, ventes et dépenses tirées des fichiers Excel. */

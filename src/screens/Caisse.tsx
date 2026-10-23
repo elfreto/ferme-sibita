@@ -6,12 +6,14 @@ import { useDonnees } from '../hooks'
 import { useUtilisateur } from '../session'
 import type { Naviguer } from '../App'
 
-type Ligne = { cle: string; date: string; creeLe?: string; texte: string; montant: number; qui?: string; table: 'ventes' | 'depenses' | 'remises'; id: string; modifie?: string; stock?: boolean }
+type Ligne = { cle: string; date: string; creeLe?: string; texte: string; montant: number; qui?: string; table: 'ventes' | 'depenses' | 'remises'; id: string; modifie?: string; stock?: boolean; bandeId?: string }
 
 export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
   const d = useDonnees()
   const u = useUtilisateur()
   const [demande, setDemande] = useState<{ message: string; action: () => Promise<void> } | null>(null)
+  // '' = toutes les opérations, 'generale' = dépenses sans bande, sinon l'id d'une bande
+  const [filtre, setFiltre] = useState('')
   if (!d) return null
   const gestion = peutGerer(u)
   const enMain = argentEnMain(d.utilisateurs, d.ventes, d.depenses, d.remises)
@@ -19,14 +21,14 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
   const dettes = d.ventes.filter((v) => resteDu(v) > 0).sort((a, b) => a.date.localeCompare(b.date))
   const totalDettes = dettes.reduce((t, v) => t + resteDu(v), 0)
 
-  // Mouvements d'argent récents saisis dans l'application (hors historique Excel)
+  // Toutes les opérations d'argent, y compris l'historique Excel
   const lignes: Ligne[] = [
-    ...d.ventes.filter((v) => !v.id.startsWith('import-')).map((v) => ({
+    ...d.ventes.map((v) => ({ bandeId: v.bandeId as string | undefined,
       cle: 'v' + v.id, id: v.id, table: 'ventes' as const, date: v.date, creeLe: v.creeLe, qui: v.auteur, modifie: v.modifiePar,
       texte: `Vente ${v.qte} × ${nombre(v.prixUnitaire)}${v.client ? ` à ${v.client}` : ''} · ${nomBande(v.bandeId)}${resteDu(v) ? ` · reste dû ${fcfa(resteDu(v))}` : ''}`,
       montant: totalVente(v),
     })),
-    ...d.depenses.filter((x) => !x.id.startsWith('import-')).map((x) => ({
+    ...d.depenses.map((x) => ({ bandeId: x.bandeId,
       cle: 'd' + x.id, id: x.id, table: 'depenses' as const, date: x.date, creeLe: x.creeLe, qui: x.auteur, modifie: x.modifiePar, stock: x.origine === 'stock',
       texte: `${x.designation} · ${CATEGORIES[x.categorie]}${payeeAvecVentes(x) ? " · payé avec l'argent des ventes" : ''}`,
       montant: -x.montant,
@@ -37,7 +39,13 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
     })),
   ].sort((a, b) => `${b.date}${b.creeLe}`.localeCompare(`${a.date}${a.creeLe}`))
 
-  const montrees = voitLesBilans(u) ? lignes : lignes.filter((l) => l.qui === u.nom)
+  const visibles = voitLesBilans(u) ? lignes : lignes.filter((l) => l.qui === u.nom)
+  const montrees = filtre === '' ? visibles
+    : filtre === 'generale' ? visibles.filter((l) => l.table === 'depenses' && !l.bandeId)
+    : visibles.filter((l) => l.bandeId === filtre)
+  const totalVentes = montrees.filter((l) => l.table === 'ventes').reduce((t, l) => t + l.montant, 0)
+  const totalDepenses = -montrees.filter((l) => l.table === 'depenses').reduce((t, l) => t + l.montant, 0)
+  const bandesTriees = [...d.bandes].sort((a, b) => b.dateReception.localeCompare(a.dateReception))
   const moi = enMain.get(u.nom)
   const aConfirmer = d.remises.filter((r) => versementEnAttente(r) && r.a === u.nom)
   const sortant = d.remises.filter((r) => versementEnAttente(r) && r.de === u.nom).reduce((t, r) => t + r.montant, 0)
@@ -114,10 +122,23 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
       </section>
 
       <section>
-        <h3>Opérations récentes</h3>
-        {montrees.length === 0 && <p className="petit">Aucune vente, dépense ou versement saisi pour l'instant.</p>}
+        <h3>Toutes les opérations</h3>
+        <label className="filtre-bande">
+          Bande
+          <select id="filtre-bande" value={filtre} onChange={(e) => setFiltre(e.target.value)}>
+            <option value="">Toutes les bandes et les versements</option>
+            {bandesTriees.map((b) => <option key={b.id} value={b.id}>{b.nom}{b.statut === 'cloturee' ? ' (clôturée)' : ''}</option>)}
+            <option value="generale">Dépenses générales (sans bande)</option>
+          </select>
+        </label>
+        {filtre !== '' && montrees.length > 0 && (
+          <p className="info">
+            {montrees.length} opération{montrees.length > 1 ? 's' : ''} · ventes {fcfa(totalVentes)} · dépenses {fcfa(totalDepenses)}
+          </p>
+        )}
+        {montrees.length === 0 && <p className="petit">Aucune opération{filtre ? ' pour ce choix' : " pour l'instant"}.</p>}
         <ul className="liste-operations">
-          {montrees.slice(0, 60).map((l) => (
+          {montrees.map((l) => (
             <li key={l.cle}>
               <span className={l.modifie ? 'rouge' : ''}>
                 {l.texte}

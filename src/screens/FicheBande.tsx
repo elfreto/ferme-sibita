@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { CATEGORIES, dirigeLesBandes, enregistrer, peutGerer, peutSaisir, supprimer, supprimerBande, voitLesBilans, type Categorie } from '../db'
+import { CATEGORIES, apresCloture, cloturerBande, dirigeLesBandes, enregistrer, peutGerer, peutSaisir, supprimer, supprimerBande, voitLesBilans, type Categorie } from '../db'
 import { MOIS } from './NouvelleBande'
 import type { Bilan } from '../argent'
-import { alimentPrevuKg, aujourdhui, dateCourte, dateLongue, fcfa, nombre, pourcent, type Jour } from '../calc'
+import { alimentPrevuKg, aujourdhui, journees, dateCourte, dateLongue, fcfa, nombre, pourcent, type Jour } from '../calc'
 import { useBande } from '../hooks'
 import { useUtilisateur } from '../session'
 import { ResumeSaisie, historiqueModifications } from './SaisieJour'
@@ -18,23 +18,35 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
   const [demande, setDemande] = useState<{ message: string; action: () => Promise<void>; titre?: string; bouton?: string } | null>(null)
   const [nouvelleDate, setNouvelleDate] = useState<string | null>(null)
   const [erreurDate, setErreurDate] = useState('')
+  const [dateFin, setDateFin] = useState<string | null>(null)
   if (!data) return null
   const { bande, jours, resume: r } = data
   const gestion = peutGerer(u)
   const saisit = peutSaisir(u)
 
-  function cloturer() {
-    if (r.joursManquants.length) {
+  async function cloturer() {
+    if (!dateFin) return
+    const saisies = jours.flatMap((j) => j.saisies)
+    const manquants = journees({ ...bande, dateCloture: dateFin }, saisies, data!.ventes, dateFin).filter((j) => j.manquant).map((j) => j.date)
+    if (manquants.length) {
       setDemande({
-        message: `Impossible de clôturer : ${r.joursManquants.length} jour${r.joursManquants.length > 1 ? 's' : ''} sans saisie. Rattrapez-les d'abord.`,
-        action: async () => naviguer({ nom: 'saisie', bandeId, date: r.joursManquants[0] }),
+        message: `Impossible de clôturer au ${dateCourte(dateFin)} : ${pluriel(manquants.length, 'jour')} sans saisie avant cette date. Rattrapez-les d'abord.`,
+        action: async () => naviguer({ nom: 'saisie', bandeId, date: manquants[0] }),
       })
       return
     }
+    const apres = await apresCloture(bandeId, dateFin)
+    const n = apres.saisies.length + apres.ventes.length + apres.depenses.length
+    const fin = dateFin
     setDemande({
-      message: `Clôturer ${bande.nom} ? Elle disparaîtra de l'accueil.`,
+      titre: bande.statut === 'cloturee' ? 'Changer la date de clôture ?' : 'Clôturer la bande ?',
+      bouton: n ? 'Oui, clôturer et supprimer' : 'Oui, clôturer',
+      message: `${bande.nom} sera clôturée le ${dateLongue(fin)}.` + (n
+        ? ` Les données après cette date seront supprimées : ${pluriel(apres.saisies.length, 'saisie')}, ${pluriel(apres.ventes.length, 'vente')} et ${pluriel(apres.depenses.length, 'dépense')}. Cette action est irréversible.`
+        : ' Elle disparaîtra de l\'accueil.'),
       action: async () => {
-        await enregistrer('bandes', { ...bande, statut: 'cloturee', dateCloture: aujourdhui() })
+        await cloturerBande(bande, fin)
+        setDateFin(null)
         naviguer({ nom: 'accueil' })
       },
     })
@@ -139,8 +151,23 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
         {jours.length === 0 && <p>Aucune saisie pour l'instant.</p>}
       </section>
 
-      {dirigeLesBandes(u) && bande.statut === 'en_cours' && (
-        <button className="danger" onClick={cloturer}>Clôturer la bande</button>
+      {dirigeLesBandes(u) && dateFin === null && (
+        bande.statut === 'en_cours'
+          ? <button className="danger" onClick={() => setDateFin(aujourdhui())}>Clôturer la bande</button>
+          : <button onClick={() => setDateFin(bande.dateCloture ?? aujourdhui())}>Changer la date de clôture</button>
+      )}
+      {dateFin !== null && (
+        <div className="carte pile">
+          <label>
+            Date de clôture
+            <ChoixDate id="bande-date-cloture" value={dateFin} onChange={setDateFin} min={bande.dateReception} />
+          </label>
+          <p className="petit">Les saisies, ventes et dépenses de la bande après cette date seront supprimées.</p>
+          <div className="segments">
+            <button onClick={() => setDateFin(null)}>Annuler</button>
+            <button className="actif" onClick={cloturer}>Clôturer à cette date</button>
+          </div>
+        </div>
       )}
       {dirigeLesBandes(u) && (
         <button className="danger" onClick={supprimerLaBande}>Supprimer la bande</button>

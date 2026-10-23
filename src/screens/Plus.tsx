@@ -4,6 +4,7 @@ import { ACCES_ROLE, LIBELLE_ROLE, db, gereLesComptes, importerHistorique, type 
 import { dateCourte } from '../calc'
 import { lancerSynchro, supabase, synchroActive, useSynchro } from '../sync'
 import { useUtilisateur } from '../session'
+import { exporterExcel, lireSauvegarde, nomFichierSauvegarde, restaurer } from '../sauvegarde'
 import type { Naviguer } from '../App'
 
 export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQuitter: () => void }) {
@@ -22,6 +23,35 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
       setImportMessage("Ce fichier n'est pas l'historique de la ferme (historique.json).")
     }
   }
+  const [sauvegarde, setSauvegarde] = useState('')
+  const [aRestaurer, setARestaurer] = useState<{ nom: string; donnees: Awaited<ReturnType<typeof lireSauvegarde>> } | null>(null)
+  async function telecharger() {
+    setSauvegarde('Préparation du fichier…')
+    try {
+      const blob = await exporterExcel()
+      const lien = document.createElement('a')
+      lien.href = URL.createObjectURL(blob)
+      lien.download = nomFichierSauvegarde()
+      document.body.appendChild(lien)
+      lien.click()
+      lien.remove()
+      setTimeout(() => URL.revokeObjectURL(lien.href), 60_000)
+      setSauvegarde(`Fichier ${lien.download} téléchargé. Gardez-le en lieu sûr (Drive, e-mail…).`)
+    } catch {
+      setSauvegarde("Le fichier n'a pas pu être créé.")
+    }
+  }
+  async function choisirSauvegarde(fichier?: File) {
+    if (!fichier) return
+    setSauvegarde('Lecture du fichier…')
+    try {
+      setARestaurer({ nom: fichier.name, donnees: await lireSauvegarde(await fichier.arrayBuffer()) })
+      setSauvegarde('')
+    } catch {
+      setSauvegarde("Ce fichier n'est pas une sauvegarde Excel de la ferme.")
+    }
+  }
+  const compte = (t: keyof Awaited<ReturnType<typeof lireSauvegarde>>) => aRestaurer?.donnees[t]?.length ?? 0
   const heure = s.derniere ? `${dateCourte(s.derniere.slice(0, 10))} à ${new Date(s.derniere).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}` : undefined
   return (
     <div className="pile">
@@ -57,6 +87,37 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
             }}>{s.enAttente > 0 ? 'Délier ce téléphone (attendez que tout soit envoyé)' : 'Délier ce téléphone de la ferme'}</button>
           )}
         </section>
+      )}
+      {gereLesComptes(u) && (
+        <section className="carte pile">
+          <h3>Sauvegarde Excel</h3>
+          <p className="petit">Un fichier Excel avec toutes les données (bandes, saisies, ventes, dépenses, versements, stock, équipe). Il permet de tout remettre en cas de problème. Les codes PIN n'y sont pas.</p>
+          <button className="secondaire" id="telecharger-sauvegarde" onClick={() => void telecharger()}>Télécharger la sauvegarde Excel</button>
+          <label className="secondaire bouton-fichier">
+            Restaurer une sauvegarde Excel
+            <input id="restaurer-sauvegarde" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              onChange={(e) => { void choisirSauvegarde(e.target.files?.[0]); e.target.value = '' }} hidden />
+          </label>
+          {sauvegarde && <p className="info">{sauvegarde}</p>}
+        </section>
+      )}
+      {aRestaurer && (
+        <div className="confirmer danger" role="alertdialog">
+          <h3>Restaurer la sauvegarde ?</h3>
+          <p>
+            {aRestaurer.nom} contient {compte('bandes')} bandes, {compte('journal')} saisies, {compte('ventes')} ventes, {compte('depenses')} dépenses,
+            {' '}{compte('remises')} versements et {compte('mouvements')} mouvements de stock.
+            Les éléments du fichier remplaceront ceux qui ont le même identifiant, sur tous les téléphones. Rien n'est supprimé.
+          </p>
+          <div className="segments">
+            <button onClick={() => setARestaurer(null)}>Annuler</button>
+            <button className="actif" onClick={async () => {
+              const n = await restaurer(aRestaurer.donnees)
+              setARestaurer(null)
+              setSauvegarde(`${n} éléments restaurés : ils partent vers les autres téléphones.`)
+            }}>Oui, restaurer</button>
+          </div>
+        </div>
       )}
       <button className="danger" onClick={onQuitter}>Se déconnecter</button>
     </div>

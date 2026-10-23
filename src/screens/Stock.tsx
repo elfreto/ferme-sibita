@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { enregistrer, nouvelId, peutGerer, peutSaisir, supprimer, type Categorie, type Mouvement, type TypeArticle } from '../db'
+import { enregistrer, nouvelId, payeeAvecVentes, peutGerer, peutSaisir, supprimer, type Categorie, type Mouvement, type TypeArticle } from '../db'
 import { aujourdhui, dateCourte, fcfa, nombre } from '../calc'
 import { useDonnees } from '../hooks'
+import { argentEnMain } from '../argent'
 import { estStockBas, etatStocks, MAIS, seuilAlerte, PROVENDE_MAISON, PROVENDE_SPC, SACS_MAISON_PAR_SAC_MAIS } from '../stock'
 import { useUtilisateur } from '../session'
 import type { Naviguer } from '../App'
@@ -145,6 +146,7 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
   const [prix, setPrix] = useState('')
   const [bandeId, setBandeId] = useState('')
   const [note, setNote] = useState('')
+  const [avecVentes, setAvecVentes] = useState(false)
   const [erreur, setErreur] = useState('')
   const existant = mouvementId ? d?.mouvements.find((m) => m.id === mouvementId) : undefined
   useEffect(() => {
@@ -154,12 +156,15 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
     setPrix(existant.prixTotal ? String(existant.prixTotal) : '')
     setBandeId(existant.bandeId ?? '')
     setNote(existant.note ?? '')
+    const dep = existant.depenseId ? d?.depenses.find((x) => x.id === existant.depenseId) : undefined
+    setAvecVentes(!!dep && payeeAvecVentes(dep))
   }, [existant?.id])
   if (!d) return null
   const a = d.articles.find((x) => x.id === articleId)
   if (!a) return <p>Article introuvable.</p>
   const actuel = etatStocks(d.articles, d.mouvements, d.saisies).get(a.id) ?? 0
   const fabrication = sens === 'entree' && a.id === PROVENDE_MAISON
+  const caseVentes = sens === 'entree' && (a.id === PROVENDE_SPC || a.id === MAIS)
   const enCours = d.bandes.filter((b) => b.statut === 'en_cours')
   const titre = (existant ? 'Modifier : ' : '') + (fabrication ? 'Entrée de provende maison' : sens === 'entree' ? 'Entrée en stock (achat)' : sens === 'sortie' ? 'Sortie du stock' : 'Inventaire')
 
@@ -170,6 +175,11 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
     const dispo = actuel + (existant?.sens === 'sortie' ? existant.quantite : 0)
     if (sens === 'sortie' && q > dispo) return setErreur(`Il n'y a que ${dispo} ${a!.unite}s en stock.`)
     const p = fabrication ? undefined : lire(prix)
+    // Achat de Provende SPC ou de maïs payé avec l'argent des ventes : retiré de l'argent en main de celui qui saisit
+    const ancienneDep = existant?.depenseId ? d!.depenses.find((x) => x.id === existant.depenseId) : undefined
+    const payeur = ancienneDep?.auteur ?? u.nom
+    const enMain = (argentEnMain(d!.utilisateurs, d!.ventes, d!.depenses, d!.remises).get(payeur) ?? 0) + (ancienneDep && payeeAvecVentes(ancienneDep) ? ancienneDep.montant : 0)
+    if (caseVentes && avecVentes && p && p > enMain) return setErreur(`${payeur} n'a que ${fcfa(enMain)} d'argent des ventes en main.`)
     const maintenant = new Date().toISOString()
     const m: Mouvement = existant
       ? { ...existant, date, quantite: q, bandeId: bandeId || undefined, prixTotal: sens === 'entree' ? p : undefined,
@@ -184,6 +194,7 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
       await enregistrer('depenses', {
         ...ancienne, id: m.depenseId, date, bandeId: bandeId || undefined, categorie, designation: `${a!.nom} : ${q} ${a!.unite}s`,
         montant: p, auteur: ancienne?.auteur ?? u.nom, creeLe: ancienne?.creeLe ?? maintenant, origine: 'stock' as const,
+        payeAvecVentes: caseVentes && avecVentes,
       })
     } else if (m.depenseId) {
       await supprimer('depenses', m.depenseId)
@@ -212,6 +223,12 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
           Prix total payé (FCFA)
           <input id="mvt-prix" type="number" inputMode="numeric" value={prix} onChange={(e) => setPrix(e.target.value)} />
           <small className="petit">Avec un prix, l'achat est aussi ajouté aux dépenses de la bande choisie.</small>
+        </label>
+      )}
+      {caseVentes && (
+        <label className="case">
+          <input id="mvt-avec-ventes" type="checkbox" checked={avecVentes} onChange={(e) => setAvecVentes(e.target.checked)} />
+          Payé avec l'argent des ventes
         </label>
       )}
       {sens !== 'inventaire' && (

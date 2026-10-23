@@ -171,7 +171,7 @@ export function NouvelleDepense({ editId, onFini }: { editId?: string; onFini: (
   const [designation, setDesignation] = useState('')
   const [precision, setPrecision] = useState('')
   const [montant, setMontant] = useState('')
-  const [avecVentes, setAvecVentes] = useState(true)
+  const [avecVentes, setAvecVentes] = useState(false)
   const [erreur, setErreur] = useState('')
   const [fini, setFini] = useState(false)
   const existant = editId ? d?.depenses.find((x) => x.id === editId) : undefined

@@ -243,3 +243,4 @@ button.lien.neutre { color: var(--vert); }
 .tableau-stock .actions-stock .lien { padding: 0; }
 .choix-date { display: grid; grid-template-columns: 1fr 1.4fr 1.3fr; gap: 8px; }
 .bouton-fichier { display: block; text-align: center; padding: 12px; border: 2px solid var(--vert); border-radius: 12px; color: var(--vert); font-weight: 700; cursor: pointer; }
+.filtre-bande { display: flex; flex-direction: column; gap: 6px; font-weight: 600; margin-bottom: 8px; }
