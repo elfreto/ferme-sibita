@@ -244,3 +244,6 @@ button.lien.neutre { color: var(--vert); }
 .choix-date { display: grid; grid-template-columns: 1fr 1.4fr 1.3fr; gap: 8px; }
 .bouton-fichier { display: block; text-align: center; padding: 12px; border: 2px solid var(--vert); border-radius: 12px; color: var(--vert); font-weight: 700; cursor: pointer; }
 .filtre-bande { display: flex; flex-direction: column; gap: 6px; font-weight: 600; margin-bottom: 8px; }
+.bilan div.bilan-depenses dt, .bilan div.bilan-depenses dd { color: #E74C3C; }
+.bilan div.bilan-ventes dt, .bilan div.bilan-ventes dd { color: #2ECC71; }
+.bilan div.bilan-resultat dt, .bilan div.bilan-resultat dd { color: #3498DB; }

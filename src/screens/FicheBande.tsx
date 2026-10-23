@@ -338,13 +338,13 @@ function BilanCalcule({ b, enCours }: { b: Bilan; enCours: boolean }) {
     <section className="carte">
       <h3>{enCours ? 'Bilan provisoire' : 'Bilan'}</h3>
       <dl className="bilan">
-        <div><dt>Dépenses totales</dt><dd>{fcfa(b.totalDepenses)}</dd></div>
+        <div className="bilan-depenses"><dt>Dépenses totales</dt><dd>{fcfa(b.totalDepenses)}</dd></div>
         {([1, 2, 3, 4, 5] as Categorie[]).filter((c) => b.depensesParCategorie[c]).map((c) => (
           <div key={c} className="categorie"><dt>{CATEGORIES[c]}</dt><dd>{fcfa(b.depensesParCategorie[c])}</dd></div>
         ))}
-        <div><dt>Ventes totales</dt><dd>{fcfa(b.totalVentes)}</dd></div>
+        <div className="bilan-ventes"><dt>Ventes totales</dt><dd>{fcfa(b.totalVentes)}</dd></div>
         {b.dettesClients > 0 && <div><dt>dont dettes clients</dt><dd className="rouge">{fcfa(b.dettesClients)}</dd></div>}
-        <div className="fort"><dt>Résultat net</dt><dd className={b.resultatNet < 0 ? 'rouge' : ''}>{fcfa(b.resultatNet)}</dd></div>
+        <div className="fort bilan-resultat"><dt>Résultat net</dt><dd>{fcfa(b.resultatNet)}</dd></div>
         {b.coutParPoulet !== undefined && <div><dt>Coût production / poulet</dt><dd>{fcfa(Math.round(b.coutParPoulet))}</dd></div>}
         {b.prixMoyen !== undefined && <div><dt>Prix de vente moyen</dt><dd>{fcfa(Math.round(b.prixMoyen))}</dd></div>}
         {lignes.map(([l, v]) => <div key={l}><dt>{l}</dt><dd>{v}</dd></div>)}
@@ -363,13 +363,19 @@ const LIBELLES_BILAN: [string, string, 'fcfa' | 'nb' | 'pct'][] = [
   ['Taux de perte', 'Taux de perte', 'pct'],
 ]
 
+const COULEUR_BILAN: Record<string, string> = {
+  'MONTANT TOTAL DES DEPENSES': 'bilan-depenses',
+  'PRIX TOTAL DES VENTES': 'bilan-ventes',
+  'RESULTAT NET': 'fort bilan-resultat',
+}
+
 function BilanExcel({ bilan }: { bilan: Record<string, number> }) {
   return (
     <section className="carte">
       <h3>Bilan (repris du fichier Excel)</h3>
       <dl className="bilan">
         {LIBELLES_BILAN.filter(([cle]) => bilan[cle] !== undefined).map(([cle, lib, fmt]) => (
-          <div key={cle} className={cle === 'RESULTAT NET' ? 'fort' : ''}>
+          <div key={cle} className={COULEUR_BILAN[cle] ?? ''}>
             <dt>{lib}</dt>
             <dd>{fmt === 'fcfa' ? fcfa(Math.round(bilan[cle])) : fmt === 'pct' ? pourcent(bilan[cle]) : nombre(bilan[cle])}</dd>
           </div>
