@@ -5,6 +5,7 @@ import { dateCourte } from '../calc'
 import { lancerSynchro, supabase, synchroActive, useSynchro } from '../sync'
 import { useUtilisateur } from '../session'
 import { exporterExcel, lireSauvegarde, nomFichierSauvegarde, restaurer } from '../sauvegarde'
+import { telechargerFichier } from '../exportBilan'
 import type { Naviguer } from '../App'
 
 export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQuitter: () => void }) {
@@ -28,15 +29,9 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
   async function telecharger() {
     setSauvegarde('Préparation du fichier…')
     try {
-      const blob = await exporterExcel()
-      const lien = document.createElement('a')
-      lien.href = URL.createObjectURL(blob)
-      lien.download = nomFichierSauvegarde()
-      document.body.appendChild(lien)
-      lien.click()
-      lien.remove()
-      setTimeout(() => URL.revokeObjectURL(lien.href), 60_000)
-      setSauvegarde(`Fichier ${lien.download} téléchargé. Gardez-le en lieu sûr (Drive, e-mail…).`)
+      const nom = nomFichierSauvegarde()
+      telechargerFichier(await exporterExcel(), nom)
+      setSauvegarde(`Fichier ${nom} téléchargé. Gardez-le en lieu sûr (Drive, e-mail…).`)
     } catch {
       setSauvegarde("Le fichier n'a pas pu être créé.")
     }

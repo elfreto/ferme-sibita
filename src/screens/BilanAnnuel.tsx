@@ -1,20 +1,13 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, type Bande, type Mouvement } from '../db'
+import { db, type Mouvement } from '../db'
 import { aujourdhui, fcfa, journees, nombre, resume } from '../calc'
 import { bilanBande } from '../argent'
 import { MAIS, PROVENDE_MAISON, PROVENDE_SPC } from '../stock'
 import type { Naviguer } from '../App'
+import { exporterBilanAnnuel, telechargerFichier, type LigneAnnuelle } from '../exportBilan'
 
-interface LigneBande {
-  bande: Bande
-  depenses: number
-  ventes: number
-  resultat: number
-  vendus: number
-  morts: number
-  alimentKg: number
-}
+type LigneBande = LigneAnnuelle
 
 /** Chiffres de chaque bande, comme sur sa fiche : bilan repris de l'Excel s'il existe, sinon calculé. */
 function useAnnees() {
@@ -51,6 +44,7 @@ const sacsEntres = (mouvements: Mouvement[], articleId: string, bandes: Set<stri
 export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
   const d = useAnnees()
   const [annee, setAnnee] = useState(aujourdhui().slice(0, 4))
+  const [exportMessage, setExportMessage] = useState('')
   if (!d) return null
   const annees = [...new Set([aujourdhui().slice(0, 4), ...d.lignes.map((l) => l.bande.dateReception.slice(0, 4))])].sort().reverse()
   // Une bande compte dans l'année où ses poussins ont été reçus
@@ -60,6 +54,21 @@ export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
   const ventes = somme((l) => l.ventes)
   const vendus = somme((l) => l.vendus)
   const ids = new Set(lignes.map((l) => l.bande.id))
+  const sacs = {
+    mais: sacsEntres(d.mouvements, MAIS, ids),
+    provendeMaison: sacsEntres(d.mouvements, PROVENDE_MAISON, ids),
+    provendeSpc: sacsEntres(d.mouvements, PROVENDE_SPC, ids),
+  }
+  async function exporter() {
+    setExportMessage('Préparation du fichier…')
+    try {
+      const nom = `bilan-annuel-${annee}.xlsx`
+      telechargerFichier(await exporterBilanAnnuel({ annee, lignes, sacs }), nom)
+      setExportMessage(`Fichier ${nom} téléchargé.`)
+    } catch {
+      setExportMessage("Le fichier n'a pas pu être créé.")
+    }
+  }
   return (
     <div className="pile">
       <h1>Tableau de bord annuel</h1>
@@ -86,11 +95,14 @@ export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
           <div><dt>Coût production / poulet</dt><dd>{vendus ? fcfa(Math.round(depenses / vendus)) : '—'}</dd></div>
           <div><dt>Prix de vente moyen</dt><dd>{vendus ? fcfa(Math.round(ventes / vendus)) : '—'}</dd></div>
           <div className="bilan-separation"><span>Sacs entrés pour ces bandes</span></div>
-          <div><dt>Maïs acheté</dt><dd>{nombre(sacsEntres(d.mouvements, MAIS, ids), 1)} sacs</dd></div>
-          <div><dt>Provende maison</dt><dd>{nombre(sacsEntres(d.mouvements, PROVENDE_MAISON, ids), 1)} sacs</dd></div>
-          <div><dt>Provende SPC</dt><dd>{nombre(sacsEntres(d.mouvements, PROVENDE_SPC, ids), 1)} sacs</dd></div>
+          <div><dt>Maïs acheté</dt><dd>{nombre(sacs.mais, 1)} sacs</dd></div>
+          <div><dt>Provende maison</dt><dd>{nombre(sacs.provendeMaison, 1)} sacs</dd></div>
+          <div><dt>Provende SPC</dt><dd>{nombre(sacs.provendeSpc, 1)} sacs</dd></div>
         </dl>
       </section>
+
+      {lignes.length > 0 && <button className="secondaire" id="exporter-bilan-annuel" onClick={() => void exporter()}>Exporter le bilan {annee} (Excel)</button>}
+      {exportMessage && <p className="info">{exportMessage}</p>}
 
       <ResultatsParBande lignes={lignes} naviguer={naviguer} />
     </div>

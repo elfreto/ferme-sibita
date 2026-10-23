@@ -8,6 +8,7 @@ import { useUtilisateur } from '../session'
 import { ResumeSaisie, historiqueModifications } from './SaisieJour'
 import type { Naviguer } from '../App'
 import ChoixDate from '../ChoixDate'
+import { LIBELLES_BILAN, exporterBilanBande, nomFichierBilan, telechargerFichier } from '../exportBilan'
 
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? 's' : ''}`
 
@@ -19,6 +20,7 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
   const [nouvelleDate, setNouvelleDate] = useState<string | null>(null)
   const [erreurDate, setErreurDate] = useState('')
   const [dateFin, setDateFin] = useState<string | null>(null)
+  const [exportMessage, setExportMessage] = useState('')
   if (!data) return null
   const { bande, jours, resume: r } = data
   const gestion = peutGerer(u)
@@ -92,6 +94,17 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
     setNouvelleDate(null)
   }
 
+  async function exporter() {
+    setExportMessage('Préparation du fichier…')
+    try {
+      const nom = nomFichierBilan(bande.nom)
+      telechargerFichier(await exporterBilanBande(data!), nom)
+      setExportMessage(`Fichier ${nom} téléchargé.`)
+    } catch {
+      setExportMessage("Le fichier n'a pas pu être créé.")
+    }
+  }
+
   const demanderSuppression = (id: string) =>
     setDemande({ message: 'Supprimer cette saisie ?', action: () => supprimer('journal', id) })
 
@@ -144,6 +157,12 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
       <GraphiqueVentes jours={jours} />
 
       {voitLesBilans(u) && (bande.bilanExcel ? <BilanExcel bilan={bande.bilanExcel} /> : <BilanCalcule b={data.bilan} enCours={bande.statut === 'en_cours'} />)}
+      {voitLesBilans(u) && (
+        <>
+          <button className="secondaire" id="exporter-bilan" onClick={() => void exporter()}>Exporter le bilan (Excel)</button>
+          {exportMessage && <p className="info">{exportMessage}</p>}
+        </>
+      )}
 
       <section>
         <h3>Jour par jour</h3>
@@ -371,16 +390,6 @@ function BilanCalcule({ b, enCours }: { b: Bilan; enCours: boolean }) {
     </section>
   )
 }
-
-const LIBELLES_BILAN: [string, string, 'fcfa' | 'nb' | 'pct'][] = [
-  ['MONTANT TOTAL DES DEPENSES', 'Dépenses totales', 'fcfa'],
-  ['PRIX TOTAL DES VENTES', 'Ventes totales', 'fcfa'],
-  ['RESULTAT NET', 'Résultat net', 'fcfa'],
-  ['Prix de production / poulet', 'Coût production / poulet', 'fcfa'],
-  ['Prix moyen du poulet', 'Prix de vente moyen', 'fcfa'],
-  ['Nombre de poulets vendus', 'Poulets vendus', 'nb'],
-  ['Taux de perte', 'Taux de perte', 'pct'],
-]
 
 const COULEUR_BILAN: Record<string, string> = {
   'MONTANT TOTAL DES DEPENSES': 'bilan-depenses',
