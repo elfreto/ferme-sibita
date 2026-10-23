@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { CATEGORIES, apresCloture, cloturerBande, dirigeLesBandes, enregistrer, peutGerer, peutSaisir, supprimer, supprimerBande, voitLesBilans, type Categorie } from '../db'
 import { MOIS } from './NouvelleBande'
 import type { Bilan } from '../argent'
@@ -345,6 +345,7 @@ function BilanCalcule({ b, enCours }: { b: Bilan; enCours: boolean }) {
         <div className="bilan-ventes"><dt>Ventes totales</dt><dd>{fcfa(b.totalVentes)}</dd></div>
         {b.dettesClients > 0 && <div><dt>dont dettes clients</dt><dd className="rouge">{fcfa(b.dettesClients)}</dd></div>}
         <div className="fort bilan-resultat"><dt>Résultat net</dt><dd>{fcfa(b.resultatNet)}</dd></div>
+        <div className="bilan-separation"><span>Indicateurs clés</span></div>
         {b.coutParPoulet !== undefined && <div><dt>Coût production / poulet</dt><dd>{fcfa(Math.round(b.coutParPoulet))}</dd></div>}
         {b.prixMoyen !== undefined && <div><dt>Prix de vente moyen</dt><dd>{fcfa(Math.round(b.prixMoyen))}</dd></div>}
         {lignes.map(([l, v]) => <div key={l}><dt>{l}</dt><dd>{v}</dd></div>)}
@@ -375,10 +376,13 @@ function BilanExcel({ bilan }: { bilan: Record<string, number> }) {
       <h3>Bilan (repris du fichier Excel)</h3>
       <dl className="bilan">
         {LIBELLES_BILAN.filter(([cle]) => bilan[cle] !== undefined).map(([cle, lib, fmt]) => (
-          <div key={cle} className={COULEUR_BILAN[cle] ?? ''}>
-            <dt>{lib}</dt>
-            <dd>{fmt === 'fcfa' ? fcfa(Math.round(bilan[cle])) : fmt === 'pct' ? pourcent(bilan[cle]) : nombre(bilan[cle])}</dd>
-          </div>
+          <Fragment key={cle}>
+            {cle === 'Prix de production / poulet' && <div className="bilan-separation"><span>Indicateurs clés</span></div>}
+            <div className={COULEUR_BILAN[cle] ?? ''}>
+              <dt>{lib}</dt>
+              <dd>{fmt === 'fcfa' ? fcfa(Math.round(bilan[cle])) : fmt === 'pct' ? pourcent(bilan[cle]) : nombre(bilan[cle])}</dd>
+            </div>
+          </Fragment>
         ))}
       </dl>
     </section>
