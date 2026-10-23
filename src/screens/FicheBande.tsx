@@ -196,7 +196,6 @@ interface LigneProps {
 }
 
 function LigneJour({ j, ouvert, onClic, onSupprimer, onModifier, onRattraper }: LigneProps) {
-  const bas = j.gParSujet !== undefined && j.gParSujet < j.ration * 0.85
   if (j.manquant) {
     const auj = j.date === aujourdhui()
     return (
@@ -217,7 +216,7 @@ function LigneJour({ j, ouvert, onClic, onSupprimer, onModifier, onRattraper }: 
         <td className={j.rouge.morts ? 'rouge' : j.morts ? 'fort' : ''}>{j.morts || '·'}</td>
         <td>{nombre(j.vivants)}{j.vendus > 0 && <small className="vendus"> −{j.vendus} vendus</small>}</td>
         <td>{nombre(alimentPrevuKg(j.age, j.vivants), 1)} kg</td>
-        <td className={j.rouge.aliment ? 'rouge' : bas ? 'alerte' : ''}>{j.gParSujet ?? '·'}</td>
+        <td>{j.ration}</td>
       </tr>
       {ouvert && (
         <tr className="detail">

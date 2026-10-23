@@ -20,7 +20,7 @@ export function rationPrevue(ageJour: number): number {
   if (ageJour <= 28) return 85
   if (ageJour <= 35) return 110
   if (ageJour <= 42) return 139
-  return 183
+  return 180
 }
 
 /** Aliment prévu (kg) : ration du jour × poulets vivants, à titre indicatif. */

@@ -128,7 +128,7 @@ function CarteBande({ bandeId, naviguer }: { bandeId: string; naviguer: Naviguer
       )}
       <div className={`aujourdhui ${auj && !auj.manquant ? 'fait' : 'afaire'}`}>
         {auj && !auj.manquant
-          ? `Aujourd'hui : ${auj.morts} mort${auj.morts > 1 ? 's' : ''}${auj.alimentKg ? `, ${nombre(auj.alimentKg, 1)} kg d'aliment (${auj.gParSujet} g/sujet)` : ', aliment pas encore saisi'}`
+          ? `Aujourd'hui : ${auj.morts} mort${auj.morts > 1 ? 's' : ''}${auj.alimentKg ? `, ${nombre(auj.alimentKg, 1)} kg d'aliment (${auj.ration} g/sujet)` : ', aliment pas encore saisi'}`
           : "Rien n'est encore saisi aujourd'hui"}
       </div>
       {peutSaisir(u) ? (
