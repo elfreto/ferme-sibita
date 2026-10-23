@@ -1,7 +1,7 @@
 import { corrigerRation180 } from './corrections'
 import BilanAnnuel from './screens/BilanAnnuel'
 import { useEffect, useState } from 'react'
-import { LIBELLE_ROLE, initialiser, type Mouvement, type Utilisateur } from './db'
+import { LIBELLE_ROLE, dirigeLesBandes, initialiser, type Mouvement, type Utilisateur } from './db'
 import Equipe from './screens/Equipe'
 import { SessionContext, deconnecter, utilisateurMemorise } from './session'
 import Connexion from './screens/Connexion'
@@ -120,7 +120,7 @@ export default function App() {
         {ecran.nom === 'reglement' && <Reglement venteId={ecran.venteId} onFini={retour} />}
         {ecran.nom === 'stock' && <Stock naviguer={naviguer} />}
         {ecran.nom === 'mouvement' && <MouvementStock articleId={ecran.articleId} sens={ecran.sens} mouvementId={ecran.mouvementId} onFini={retour} />}
-        {ecran.nom === 'annuel' && <BilanAnnuel naviguer={naviguer} />}
+        {ecran.nom === 'annuel' && dirigeLesBandes(utilisateur) && <BilanAnnuel naviguer={naviguer} />}
         {ecran.nom === 'plus' && <Plus naviguer={naviguer} onQuitter={quitter} />}
       </main>
       <nav className="barre">

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ACCES_ROLE, LIBELLE_ROLE, db, gereLesComptes, peutGerer, importerHistorique, type Historique } from '../db'
+import { ACCES_ROLE, LIBELLE_ROLE, db, dirigeLesBandes, gereLesComptes, importerHistorique, type Historique } from '../db'
 import { dateCourte } from '../calc'
 import { lancerSynchro, supabase, synchroActive, useSynchro } from '../sync'
 import { useUtilisateur } from '../session'
@@ -60,7 +60,7 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
         <strong>Votre accès : {LIBELLE_ROLE[u.role]}</strong>
         <span>{ACCES_ROLE[u.role]}</span>
       </div>
-      {peutGerer(u) && <button className="secondaire" onClick={() => naviguer({ nom: 'annuel' })}>Tableau de bord annuel</button>}
+      {dirigeLesBandes(u) && <button className="secondaire" onClick={() => naviguer({ nom: 'annuel' })}>Tableau de bord annuel</button>}
       {gereLesComptes(u) && <button className="secondaire" onClick={() => naviguer({ nom: 'equipe' })}>Équipe et accès</button>}
       {synchroActive && (
         <section className="carte pile">

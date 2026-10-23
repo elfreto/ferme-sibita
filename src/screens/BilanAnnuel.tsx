@@ -44,8 +44,9 @@ function useAnnees() {
   }, [])
 }
 
-const sacsEntres = (mouvements: Mouvement[], articleId: string, annee: string) =>
-  mouvements.filter((m) => m.articleId === articleId && m.sens === 'entree' && m.date.startsWith(annee)).reduce((t, m) => t + m.quantite, 0)
+/** Sacs entrés en stock pour les bandes choisies (l'entrée compte pour sa bande, quelle que soit sa date). */
+const sacsEntres = (mouvements: Mouvement[], articleId: string, bandes: Set<string>) =>
+  mouvements.filter((m) => m.articleId === articleId && m.sens === 'entree' && m.bandeId && bandes.has(m.bandeId)).reduce((t, m) => t + m.quantite, 0)
 
 export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
   const d = useAnnees()
@@ -58,6 +59,7 @@ export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
   const depenses = somme((l) => l.depenses)
   const ventes = somme((l) => l.ventes)
   const vendus = somme((l) => l.vendus)
+  const ids = new Set(lignes.map((l) => l.bande.id))
   return (
     <div className="pile">
       <h1>Tableau de bord annuel</h1>
@@ -83,10 +85,10 @@ export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
           <div><dt>Total aliment donné</dt><dd>{nombre(somme((l) => l.alimentKg), 1)} kg</dd></div>
           <div><dt>Coût production / poulet</dt><dd>{vendus ? fcfa(Math.round(depenses / vendus)) : '—'}</dd></div>
           <div><dt>Prix de vente moyen</dt><dd>{vendus ? fcfa(Math.round(ventes / vendus)) : '—'}</dd></div>
-          <div className="bilan-separation"><span>Sacs entrés en stock en {annee}</span></div>
-          <div><dt>Maïs acheté</dt><dd>{nombre(sacsEntres(d.mouvements, MAIS, annee), 1)} sacs</dd></div>
-          <div><dt>Provende maison</dt><dd>{nombre(sacsEntres(d.mouvements, PROVENDE_MAISON, annee), 1)} sacs</dd></div>
-          <div><dt>Provende SPC</dt><dd>{nombre(sacsEntres(d.mouvements, PROVENDE_SPC, annee), 1)} sacs</dd></div>
+          <div className="bilan-separation"><span>Sacs entrés pour ces bandes</span></div>
+          <div><dt>Maïs acheté</dt><dd>{nombre(sacsEntres(d.mouvements, MAIS, ids), 1)} sacs</dd></div>
+          <div><dt>Provende maison</dt><dd>{nombre(sacsEntres(d.mouvements, PROVENDE_MAISON, ids), 1)} sacs</dd></div>
+          <div><dt>Provende SPC</dt><dd>{nombre(sacsEntres(d.mouvements, PROVENDE_SPC, ids), 1)} sacs</dd></div>
         </dl>
       </section>
 

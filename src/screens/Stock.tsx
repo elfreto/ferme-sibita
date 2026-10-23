@@ -165,7 +165,8 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
   const actuel = etatStocks(d.articles, d.mouvements, consommations(d.bandes, d.saisies, d.ventes)).get(a.id) ?? 0
   const fabrication = sens === 'entree' && a.id === PROVENDE_MAISON
   const caseVentes = sens === 'entree' && (a.id === PROVENDE_SPC || a.id === MAIS)
-  const enCours = d.bandes.filter((b) => b.statut === 'en_cours')
+  // Bandes en cours d'abord, puis les clôturées de la plus récente à la plus ancienne (saisie des bandes passées)
+  const bandesChoix = [...d.bandes].sort((x, y) => (x.statut === y.statut ? y.dateReception.localeCompare(x.dateReception) : x.statut === 'en_cours' ? -1 : 1))
   const titre = (existant ? 'Modifier : ' : '') + (fabrication ? 'Entrée de provende maison' : sens === 'entree' ? 'Entrée en stock (achat)' : sens === 'sortie' ? 'Sortie du stock' : 'Inventaire')
 
   async function valider() {
@@ -236,7 +237,7 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
           Bande
           <select value={bandeId} onChange={(e) => setBandeId(e.target.value)}>
             <option value="">Aucune en particulier</option>
-            {enCours.map((b) => <option key={b.id} value={b.id}>{b.nom} (espace {b.espace})</option>)}
+            {bandesChoix.map((b) => <option key={b.id} value={b.id}>{b.nom} ({b.statut === 'en_cours' ? `espace ${b.espace}` : 'clôturée'})</option>)}
           </select>
         </label>
       )}
