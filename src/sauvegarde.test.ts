@@ -39,3 +39,18 @@ describe('clôture à une date', () => {
     expect(await db.bandes.get('b1')).toMatchObject({ statut: 'cloturee', dateCloture: '2026-02-10' })
   })
 })
+
+describe('effacer toutes les données', () => {
+  it("vide les bandes et opérations, garde l'équipe, et prévient les autres téléphones", async () => {
+    const { effacerToutesLesDonnees } = await import('./db')
+    await enregistrer('bandes', bande)
+    await enregistrer('journal', { id: 's1', bandeId: 'b1', date: '2026-01-06', morts: 1 })
+    await enregistrer('utilisateurs', { id: 'justin', nom: 'Justin', role: 'cofondateur', pinHash: 'x' })
+    await db.envois.clear()
+    expect(await effacerToutesLesDonnees()).toBe(2)
+    expect(await db.bandes.count()).toBe(0)
+    expect(await db.journal.count()).toBe(0)
+    expect(await db.utilisateurs.count()).toBe(1)
+    expect((await db.envois.toArray()).map((e) => e.op)).toEqual(['delete', 'delete'])
+  })
+})

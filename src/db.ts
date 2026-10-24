@@ -323,6 +323,29 @@ export async function cloturerBande(bande: Bande, date: string) {
   await enregistrer('bandes', { ...bande, statut: 'cloturee', dateCloture: date })
 }
 
+/** Tables vidées par « Effacer toutes les données » : l'équipe et les 3 articles du stock restent. */
+export const TABLES_EFFACABLES: TableNom[] = ['bandes', 'journal', 'ventes', 'depenses', 'remises', 'mouvements']
+
+export async function compterDonnees() {
+  const n = await Promise.all(TABLES_EFFACABLES.map((t) => db.table(t).count()))
+  return Object.fromEntries(TABLES_EFFACABLES.map((t, i) => [t, n[i]])) as Record<(typeof TABLES_EFFACABLES)[number], number>
+}
+
+/** Efface bandes, saisies, ventes, dépenses, versements et mouvements de stock, sur ce téléphone et (par la synchro) sur tous les autres. */
+export async function effacerToutesLesDonnees(): Promise<number> {
+  let total = 0
+  for (const t of TABLES_EFFACABLES) {
+    await db.transaction('rw', db.table(t), db.envois, async () => {
+      const ids = (await db.table(t).toCollection().primaryKeys()) as string[]
+      await db.table(t).bulkDelete(ids)
+      const le = new Date().toISOString()
+      await db.envois.bulkAdd(ids.map((id) => ({ table: t, id, op: 'delete' as const, le })))
+      total += ids.length
+    })
+  }
+  return total
+}
+
 export type Historique = { bandes: Bande[]; journal: (Saisie & { age?: number })[]; ventes: Vente[]; depenses: Depense[] }
 
 /** Met en forme les bandes, saisies, ventes et dépenses tirées des fichiers Excel. */

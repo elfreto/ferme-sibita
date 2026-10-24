@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ACCES_ROLE, LIBELLE_ROLE, db, dirigeLesBandes, gereLesComptes, importerHistorique, type Historique } from '../db'
+import { ACCES_ROLE, LIBELLE_ROLE, compterDonnees, db, dirigeLesBandes, effacerToutesLesDonnees, gereLesComptes, importerHistorique, type Historique } from '../db'
 import { dateCourte } from '../calc'
 import { lancerSynchro, supabase, synchroActive, useSynchro } from '../sync'
 import { useUtilisateur } from '../session'
@@ -26,6 +26,8 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
     }
   }
   const [sauvegarde, setSauvegarde] = useState('')
+  const [aEffacer, setAEffacer] = useState<Awaited<ReturnType<typeof compterDonnees>> | null>(null)
+  const [motEffacer, setMotEffacer] = useState('')
   const [aRestaurer, setARestaurer] = useState<{ nom: string; donnees: Awaited<ReturnType<typeof lireSauvegarde>> } | null>(null)
   async function telecharger() {
     setSauvegarde('Préparation du fichier…')
@@ -96,7 +98,31 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
               onChange={(e) => { void choisirSauvegarde(e.target.files?.[0]); e.target.value = '' }} hidden />
           </label>
           {sauvegarde && <p className="info">{sauvegarde}</p>}
+          <button className="danger" id="effacer-donnees" onClick={async () => { setMotEffacer(''); setAEffacer(await compterDonnees()) }}>Effacer toutes les données</button>
         </section>
+      )}
+      {aEffacer && (
+        <div className="confirmer danger" role="alertdialog">
+          <h3>Effacer toutes les données ?</h3>
+          <p>
+            Seront effacés sur tous les téléphones : {aEffacer.bandes} bandes, {aEffacer.journal} saisies, {aEffacer.ventes} ventes, {aEffacer.depenses} dépenses,
+            {' '}{aEffacer.remises} versements et {aEffacer.mouvements} mouvements de stock. L'équipe, les codes et les 3 articles du stock restent.
+            Cette action est irréversible : téléchargez d'abord la sauvegarde Excel.
+          </p>
+          <label>
+            Pour confirmer, tapez EFFACER
+            <input id="mot-effacer" value={motEffacer} onChange={(e) => setMotEffacer(e.target.value)} autoComplete="off" />
+          </label>
+          <div className="segments">
+            <button onClick={() => setAEffacer(null)}>Annuler</button>
+            <button className="actif" disabled={motEffacer.trim().toUpperCase() !== 'EFFACER'} onClick={async () => {
+              const n = await effacerToutesLesDonnees()
+              setAEffacer(null)
+              setSauvegarde(`${n} éléments effacés. L'effacement part vers les autres téléphones.`)
+              void lancerSynchro()
+            }}>Oui, tout effacer</button>
+          </div>
+        </div>
       )}
       {aRestaurer && (
         <div className="confirmer danger" role="alertdialog">
