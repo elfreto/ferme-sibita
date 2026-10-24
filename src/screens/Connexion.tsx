@@ -29,7 +29,7 @@ export default function Connexion({ onConnecte }: { onConnecte: (u: Utilisateur)
   return (
     <div className="connexion">
       <h1 className="logo-connexion">
-        <img src={`${import.meta.env.BASE_URL}logo-complet.png`} alt="La Ferme de Sibita" width={150} height={160} />
+        <img src={`${import.meta.env.BASE_URL}logo-complet.png`} alt="La Ferme de Sibita" width={180} height={170} />
       </h1>
       {import.meta.env.VITE_DEMO && (
         <p className="info">
