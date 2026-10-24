@@ -1,0 +1,38 @@
+name: Compiler l'APK Android
+
+on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+      - run: gradle -p android assembleRelease
+      # L'APK est signé ensuite avec la clé de la ferme (gardée hors du dépôt) :
+      # on publie l'APK non signé et l'outil de signature d'Android.
+      - name: Publier l'APK non signé
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          OUTILS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk ferme-sibita-non-signe.apk
+          cp "$OUTILS/lib/apksigner.jar" apksigner.jar
+          gh release view apk-non-signe >/dev/null 2>&1 || \
+            gh release create apk-non-signe --prerelease --target "$GITHUB_SHA" \
+              --title "APK non signé (étape interne)" --notes "Fichier intermédiaire, ne pas installer."
+          gh release upload apk-non-signe ferme-sibita-non-signe.apk apksigner.jar --clobber
