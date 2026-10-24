@@ -87,7 +87,9 @@ public class MainActivity extends Activity {
         reglages.setDatabaseEnabled(true);
         reglages.setCacheMode(WebSettings.LOAD_DEFAULT);
         reglages.setMediaPlaybackRequiresUserGesture(false);
-        reglages.setUserAgentString(reglages.getUserAgentString() + " SibitaAndroid/1.0");
+        // Texte un peu plus petit, et le même sur tous les téléphones (ignore la grande police du système)
+        reglages.setTextZoom(85);
+        reglages.setUserAgentString(reglages.getUserAgentString() + " SibitaAndroid/1.1");
 
         web.addJavascriptInterface(new Pont(), "SibitaAndroid");
 
