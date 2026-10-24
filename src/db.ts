@@ -323,6 +323,10 @@ export async function cloturerBande(bande: Bande, date: string) {
   await enregistrer('bandes', { ...bande, statut: 'cloturee', dateCloture: date })
 }
 
+/** Les opérations (caisse, stock) d'une bande clôturée sont figées : il faut rouvrir la bande pour les modifier. */
+export const estVerrouillee = (bandes: Bande[], bandeId?: string) => !!bandeId && bandes.some((b) => b.id === bandeId && b.statut === 'cloturee')
+export const MESSAGE_VERROU = 'Cette opération appartient à une bande clôturée. Pour la modifier, le chef d\'exploitation doit d\'abord rouvrir la bande.'
+
 /** Tables vidées par « Effacer toutes les données » : l'équipe et les 3 articles du stock restent. */
 export const TABLES_EFFACABLES: TableNom[] = ['bandes', 'journal', 'ventes', 'depenses', 'remises', 'mouvements']
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LIBELLE_ROLE, CATEGORIES, enregistrer, payeeAvecVentes, peutGerer, peutSaisir, supprimer, versementEnAttente, voitLesBilans, type Remise, type Vente } from '../db'
+import { LIBELLE_ROLE, CATEGORIES, enregistrer, estVerrouillee, payeeAvecVentes, peutGerer, peutSaisir, supprimer, versementEnAttente, voitLesBilans, type Remise, type Vente } from '../db'
 import { argentEnMain, resteDu, totalVente } from '../argent'
 import { aujourdhui, dateCourte, fcfa, nombre } from '../calc'
 import { useDonnees } from '../hooks'
@@ -147,12 +147,13 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
               <span className="droite">
                 {l.table === 'remises' ? <strong>{fcfa(d.remises.find((r) => r.id === l.id)!.montant)}</strong>
                   : <strong className={l.montant < 0 ? 'negatif' : 'positif'}>{l.montant < 0 ? '−' : '+'}{fcfa(Math.abs(l.montant))}</strong>}
-                {gestion && !l.stock && (
+                {gestion && estVerrouillee(d.bandes, l.bandeId) && <small className="verrou">bande clôturée</small>}
+                {gestion && !l.stock && !estVerrouillee(d.bandes, l.bandeId) && (
                   <button className="lien neutre" onClick={() => naviguer({ nom: l.table === 'ventes' ? 'vente' : l.table === 'depenses' ? 'depense' : 'versement', editId: l.id })}>
                     Modifier
                   </button>
                 )}
-                {gestion && (
+                {gestion && !estVerrouillee(d.bandes, l.bandeId) && (
                   <button className="lien" onClick={() => setDemande({ message: `Supprimer : ${l.texte} ?`, action: () => supprimer(l.table, l.id) })}>
                     Supprimer
                   </button>

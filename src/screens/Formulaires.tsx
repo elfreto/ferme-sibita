@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CATEGORIES, enregistrer, nouvelId, payeeAvecVentes, peutGerer, type Categorie, type Depense, type Remise, type Vente, versementEnAttente } from '../db'
+import { CATEGORIES, MESSAGE_VERROU, enregistrer, estVerrouillee, nouvelId, payeeAvecVentes, peutGerer, type Categorie, type Depense, type Remise, type Vente, versementEnAttente } from '../db'
 import { argentEnMain, resteDu, totalVente } from '../argent'
 import { aujourdhui, fcfa, journees, nombre, resume } from '../calc'
 import { useDonnees } from '../hooks'
@@ -50,7 +50,7 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
   const [fini, setFini] = useState(false)
 
   const existant = editId ? d?.ventes.find((v) => v.id === editId) : undefined
-  const enCours = d?.bandes.filter((b) => b.statut === 'en_cours' || b.id === existant?.bandeId) ?? []
+  const enCours = d?.bandes.filter((b) => b.statut === 'en_cours') ?? []
   useEffect(() => {
     if (!editId && !bandeId && enCours.length) setBandeId(enCours[0].id)
   }, [enCours.length])
@@ -72,6 +72,7 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
 
   if (!d) return null
   if (fini) return <Confirmation texte={existant ? 'Vente modifiée' : 'Vente enregistrée'} />
+  if (existant && estVerrouillee(d.bandes, existant.bandeId)) return <p className="info">{MESSAGE_VERROU}</p>
   if (!enCours.length) return <p>Aucune bande en cours : rien à vendre.</p>
 
   const bande = d.bandes.find((b) => b.id === bandeId)
@@ -190,6 +191,7 @@ export function NouvelleDepense({ editId, onFini }: { editId?: string; onFini: (
 
   if (!d) return null
   if (fini) return <Confirmation texte={existant ? 'Dépense modifiée' : 'Dépense enregistrée'} />
+  if (existant && estVerrouillee(d.bandes, existant.bandeId)) return <p className="info">{MESSAGE_VERROU}</p>
   const m = lire(montant)
   // L'argent en main de l'auteur de la dépense (en modification, on lui rend d'abord l'ancien montant)
   const payeur = existant?.auteur ?? u.nom
@@ -221,7 +223,6 @@ export function NouvelleDepense({ editId, onFini }: { editId?: string; onFini: (
         Bande
         <select value={bandeId} onChange={(e) => setBandeId(e.target.value)}>
           {enCours.map((b) => <option key={b.id} value={b.id}>{b.nom} (espace {b.espace})</option>)}
-          {gestion && d.bandes.filter((b) => b.statut !== 'en_cours').map((b) => <option key={b.id} value={b.id}>{b.nom} (terminée)</option>)}
           {gestion && <option value="">Dépense générale (aucune bande)</option>}
         </select>
       </label>

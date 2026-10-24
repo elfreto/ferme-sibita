@@ -254,3 +254,4 @@ button.lien.neutre { color: var(--vert); }
 .graphique .barre-resultat.negatif path { fill: #E74C3C; }
 .graphique .barre-resultat.choisie path { stroke: var(--texte); stroke-width: 1.5; }
 .graphique .barre-resultat text.valeur { font-weight: 700; fill: var(--texte); }
+.verrou { color: var(--doux); font-style: italic; display: block; }

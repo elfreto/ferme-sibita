@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { enregistrer, nouvelId, payeeAvecVentes, peutGerer, peutSaisir, supprimer, type Categorie, type Mouvement, type TypeArticle } from '../db'
+import { MESSAGE_VERROU, enregistrer, estVerrouillee, nouvelId, payeeAvecVentes, peutGerer, peutSaisir, supprimer, type Categorie, type Mouvement, type TypeArticle } from '../db'
 import { aujourdhui, consommations, dateCourte, fcfa, nombre } from '../calc'
 import { useDonnees } from '../hooks'
 import { argentEnMain } from '../argent'
@@ -93,7 +93,8 @@ export default function Stock({ naviguer }: { naviguer: Naviguer }) {
                       <td>{a?.nom ?? '?'}<small>{m.auteur}</small></td>
                       <td>{SENS[m.sens]}{m.prixTotal ? <small>{fcfa(m.prixTotal)}</small> : null}</td>
                       <td className={m.modifieLe ? 'rouge' : ''}>{nombre(m.quantite, Number.isInteger(m.quantite) ? 0 : 1)}</td>
-                      {gestion && (
+                      {gestion && estVerrouillee(d.bandes, m.bandeId) && <td><small className="verrou">bande clôturée</small></td>}
+                      {gestion && !estVerrouillee(d.bandes, m.bandeId) && (
                         <td>
                           <div className="actions-stock">
                           <button className="lien neutre" onClick={() => naviguer({ nom: 'mouvement', articleId: m.articleId, sens: m.sens, mouvementId: m.id })}>Modifier</button>
@@ -162,11 +163,12 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
   if (!d) return null
   const a = d.articles.find((x) => x.id === articleId)
   if (!a) return <p>Article introuvable.</p>
+  if (existant && estVerrouillee(d.bandes, existant.bandeId)) return <p className="info">{MESSAGE_VERROU}</p>
   const actuel = etatStocks(d.articles, d.mouvements, consommations(d.bandes, d.saisies, d.ventes)).get(a.id) ?? 0
   const fabrication = sens === 'entree' && a.id === PROVENDE_MAISON
   const caseVentes = sens === 'entree' && (a.id === PROVENDE_SPC || a.id === MAIS)
-  // Bandes en cours d'abord, puis les clôturées de la plus récente à la plus ancienne (saisie des bandes passées)
-  const bandesChoix = [...d.bandes].sort((x, y) => (x.statut === y.statut ? y.dateReception.localeCompare(x.dateReception) : x.statut === 'en_cours' ? -1 : 1))
+  // Seules les bandes en cours reçoivent des entrées : une bande clôturée est figée
+  const bandesChoix = d.bandes.filter((b) => b.statut === 'en_cours')
   const titre = (existant ? 'Modifier : ' : '') + (fabrication ? 'Entrée de provende maison' : sens === 'entree' ? 'Entrée en stock (achat)' : sens === 'sortie' ? 'Sortie du stock' : 'Inventaire')
 
   async function valider() {
@@ -237,7 +239,7 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
           Bande
           <select value={bandeId} onChange={(e) => setBandeId(e.target.value)}>
             <option value="">Aucune en particulier</option>
-            {bandesChoix.map((b) => <option key={b.id} value={b.id}>{b.nom} ({b.statut === 'en_cours' ? `espace ${b.espace}` : 'clôturée'})</option>)}
+            {bandesChoix.map((b) => <option key={b.id} value={b.id}>{b.nom} (espace {b.espace})</option>)}
           </select>
         </label>
       )}
