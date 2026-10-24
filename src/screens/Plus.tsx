@@ -7,6 +7,7 @@ import { useUtilisateur } from '../session'
 import { exporterExcel, lireSauvegarde, nomFichierSauvegarde, restaurer } from '../sauvegarde'
 import { telechargerFichier } from '../exportBilan'
 import type { Naviguer } from '../App'
+import ChangerCode from './ChangerCode'
 
 export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQuitter: () => void }) {
   const u = useUtilisateur()
@@ -115,6 +116,7 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
           </div>
         </div>
       )}
+      <ChangerCode />
       <button className="danger" onClick={onQuitter}>Se déconnecter</button>
     </div>
   )
