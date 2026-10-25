@@ -15,7 +15,7 @@ import { NouveauVersement, NouvelleDepense, NouvelleVente, Reglement } from './s
 import Stock, { MouvementStock } from './screens/Stock'
 import Plus from './screens/Plus'
 import ConnexionFerme from './screens/ConnexionFerme'
-import { demarrerSynchro, supabase, synchroActive, useSynchro } from './sync'
+import { demarrerSynchro, fermeMemorisee, supabase, synchroActive, useSynchro } from './sync'
 
 export type Ecran =
   | { nom: 'accueil' }
@@ -43,11 +43,15 @@ export default function App() {
   const enLigne = useEnLigne()
   const synchro = useSynchro()
   // Version partagée : le téléphone doit d'abord être relié au compte de la ferme
-  const [fermeReliee, setFermeReliee] = useState(!synchroActive)
+  const [fermeReliee, setFermeReliee] = useState(!synchroActive || fermeMemorisee())
 
   useEffect(() => {
-    const session = supabase ? supabase.auth.getSession().then(({ data }) => setFermeReliee(!!data.session)) : Promise.resolve()
-    Promise.all([initialiser().then(() => (synchroActive ? undefined : corrigerRation180())), session])
+    // Vérification auprès du serveur en arrière-plan : on n'attend jamais le réseau pour ouvrir l'appli
+    supabase?.auth.getSession().then(({ data, error }) => {
+      if (!data.session && !error) setFermeReliee(false)
+    })
+    initialiser()
+      .then(() => (synchroActive ? undefined : corrigerRation180()))
       .then(utilisateurMemorise)
       .then((u) => setUtilisateur(u ?? null))
       .finally(() => setPret(true))
