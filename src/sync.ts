@@ -30,6 +30,20 @@ const CLE_SERVEUR = import.meta.env.VITE_SUPABASE_KEY as string | undefined
 export const synchroActive = !!(URL_SERVEUR && CLE_SERVEUR)
 export const supabase: SupabaseClient | null = synchroActive ? createClient(URL_SERVEUR!, CLE_SERVEUR!) : null
 
+/**
+ * Le téléphone a-t-il déjà été relié au compte de la ferme ? Lu directement dans la mémoire du téléphone,
+ * sans attendre le serveur : avec un réseau lent ou coupé, getSession() peut rester bloqué
+ * (renouvellement de la connexion) et l'appli resterait sur « Chargement… ».
+ */
+export function fermeMemorisee(): boolean {
+  if (!URL_SERVEUR) return false
+  try {
+    return !!localStorage.getItem(`sb-${new URL(URL_SERVEUR).hostname.split('.')[0]}-auth-token`)
+  } catch {
+    return false
+  }
+}
+
 const PAQUET = 500
 // On relit un peu en arrière : une modification peut recevoir son numéro juste avant une autre mais être enregistrée après
 const RECOUVREMENT = 200
