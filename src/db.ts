@@ -111,6 +111,8 @@ export interface Vente {
   date: string
   qte: number
   prixUnitaire: number
+  /** « Pas de vente » : le jour est noté sans aucune vente (qte et prix à 0) */
+  aucuneVente?: true
   client?: string
   /** Somme encaissée au moment de la vente ; le reste est une dette du client */
   montantRecu?: number

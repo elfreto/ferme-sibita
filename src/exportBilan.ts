@@ -156,7 +156,7 @@ export async function exporterBilanBande({ bande, jours, ventes, depenses, bilan
     { titre: 'Date', largeur: 12 }, { titre: 'Client', largeur: 20 }, { titre: 'Quantité', format: 'nb' },
     { titre: 'Prix unitaire', format: 'fcfa', largeur: 14 }, { titre: 'Total', format: 'fcfa', largeur: 16 },
     { titre: 'Encaissé', format: 'fcfa', largeur: 16 }, { titre: 'Reste dû', format: 'fcfa', largeur: 14 }, { titre: 'Vendeur', largeur: 14 },
-  ], [...ventes].sort((a, b) => a.date.localeCompare(b.date)).map((v) => [
+  ], [...ventes].filter((v) => !v.aucuneVente).sort((a, b) => a.date.localeCompare(b.date)).map((v) => [
     dateFr(v.date), v.client, v.qte, v.prixUnitaire, totalVente(v), encaisse(v), resteDu(v) || undefined, v.auteur,
   ]))
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CATEGORIES, MESSAGE_VERROU, enregistrer, estVerrouillee, nouvelId, payeeAvecVentes, peutGerer, type Categorie, type Depense, type Remise, type Vente, versementEnAttente } from '../db'
 import { argentEnMain, resteDu, totalVente } from '../argent'
-import { aujourdhui, fcfa, journees, nombre, resume } from '../calc'
+import { aujourdhui, dateCourte, fcfa, journees, nombre, resume } from '../calc'
 import { useDonnees } from '../hooks'
 import { useUtilisateur } from '../session'
 import { ajouterReglement } from './Caisse'
@@ -46,6 +46,7 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
   const [credit, setCredit] = useState(false)
   const [recu, setRecu] = useState('')
   const [note, setNote] = useState('')
+  const [pasDeVente, setPasDeVente] = useState(false)
   const [erreur, setErreur] = useState('')
   const [fini, setFini] = useState(false)
 
@@ -59,14 +60,14 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
     if (!existant) return
     const total = totalVente({ ...existant, montantRecu: undefined, reglements: undefined })
     setBandeId(existant.bandeId); setDate(existant.date); setQte(String(existant.qte)); setPrix(String(existant.prixUnitaire))
-    setClient(existant.client ?? ''); setNote(existant.note ?? '')
+    setClient(existant.client ?? ''); setNote(existant.note ?? ''); setPasDeVente(!!existant.aucuneVente)
     const recuInitial = existant.montantRecu ?? total
     setCredit(recuInitial < total); setRecu(recuInitial < total ? String(recuInitial) : '')
   }, [existant?.id])
   // Prix proposé : celui de la dernière vente
   useEffect(() => {
     if (!d || prix || editId) return
-    const derniere = [...d.ventes].sort((a, b) => `${b.date}${b.creeLe}`.localeCompare(`${a.date}${a.creeLe}`))[0]
+    const derniere = d.ventes.filter((v) => !v.aucuneVente).sort((a, b) => `${b.date}${b.creeLe}`.localeCompare(`${a.date}${a.creeLe}`))[0]
     if (derniere) setPrix(String(derniere.prixUnitaire))
   }, [d])
 
@@ -87,13 +88,27 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
   async function valider() {
     setErreur('')
     if (!bande) return setErreur('Choisissez la bande.')
+    const memeJour = d!.ventes.filter((v) => v.bandeId === bande.id && v.date === date && v.id !== existant?.id)
+    if (pasDeVente) {
+      if (memeJour.some((v) => !v.aucuneVente)) return setErreur(`Des ventes sont déjà enregistrées le ${dateCourte(date)} pour cette bande.`)
+      if (memeJour.length) return setErreur(`« Pas de vente » est déjà noté le ${dateCourte(date)} pour cette bande.`)
+      const champs = { bandeId: bande.id, date, qte: 0, prixUnitaire: 0, aucuneVente: true as const, note: note.trim() || undefined }
+      const v: Vente = existant
+        ? { ...existant, ...champs, client: undefined, montantRecu: undefined, reglements: undefined, ...modification(u.nom) }
+        : { id: nouvelId(), ...champs, auteur: u.nom, creeLe: new Date().toISOString() }
+      await enregistrer('ventes', v)
+      setFini(true)
+      setTimeout(onFini, 900)
+      return
+    }
+    if (memeJour.some((v) => v.aucuneVente)) return setErreur(`« Pas de vente » est noté le ${dateCourte(date)} : il faut d'abord le supprimer dans la Caisse (chef d'exploitation ou responsable d'élevage).`)
     if (!q || q <= 0 || !Number.isInteger(q)) return setErreur('Indiquez le nombre de poulets vendus.')
     if (q > dispo) return setErreur(`Il ne reste que ${dispo} poulets dans cette bande.`)
     if (!p || p <= 0) return setErreur('Indiquez le prix d\'un poulet.')
     const montantRecu = credit ? (lire(recu) ?? 0) : total
     if (montantRecu < 0 || montantRecu > total) return setErreur(`Le montant reçu doit être entre 0 et ${fcfa(total)}.`)
     if (montantRecu < total && !client.trim()) return setErreur('Pour une vente à crédit, indiquez le nom du client.')
-    const champs = { bandeId: bande.id, date, qte: q, prixUnitaire: p, montantRecu, client: client.trim() || undefined, note: note.trim() || undefined }
+    const champs = { bandeId: bande.id, date, qte: q, prixUnitaire: p, montantRecu, client: client.trim() || undefined, note: note.trim() || undefined, aucuneVente: undefined }
     const v: Vente = existant
       ? { ...existant, ...champs, ...modification(u.nom) }
       : { id: nouvelId(), ...champs, auteur: u.nom, creeLe: new Date().toISOString() }
@@ -119,6 +134,11 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
       ) : null}
       <p className="sous-titre">{bande?.nom} · {nombre(dispo)} poulets restants</p>
       <ChampDate date={date} setDate={setDate} min={bande?.dateReception} />
+      <label className="case">
+        <input id="pas-de-vente" type="checkbox" checked={pasDeVente} onChange={(e) => setPasDeVente(e.target.checked)} />
+        Pas de vente ce jour
+      </label>
+      {!pasDeVente && <>
       <div className="deux">
         <label>
           Poulets vendus
@@ -146,12 +166,13 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
           {total > 0 && <small className="petit">Reste dû : {fcfa(Math.max(0, total - (lire(recu) ?? 0)))}</small>}
         </label>
       )}
+      </>}
       <label>
         Note
         <input type="text" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
       {erreur && <p className="erreur">{erreur}</p>}
-      <button className="principal" onClick={valider}>{existant ? 'Enregistrer la modification' : 'Enregistrer la vente'}</button>
+      <button className="principal" onClick={valider}>{existant ? 'Enregistrer la modification' : pasDeVente ? 'Enregistrer « pas de vente »' : 'Enregistrer la vente'}</button>
     </div>
   )
 }

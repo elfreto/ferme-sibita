@@ -59,7 +59,7 @@ export interface Bilan {
 
 /** Bilan d'une bande calculé à partir des saisies, ventes et dépenses (mêmes règles que la fiche Excel). */
 export function bilanBande(bande: Bande, jours: Jour[], ventes: Vente[], depenses: Depense[]): Bilan {
-  const premiereVente = ventes.map((v) => v.date).sort()[0]
+  const premiereVente = ventes.filter((v) => v.qte > 0).map((v) => v.date).sort()[0]
   const morts = (j: Jour) => j.morts
   const mortsAvantVente = jours.filter((j) => !premiereVente || j.date <= premiereVente).reduce((t, j) => t + morts(j), 0)
   // Les morts du premier jour de vente comptent encore avant la vente, comme dans la fiche Excel

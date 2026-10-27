@@ -25,7 +25,7 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
   const lignes: Ligne[] = [
     ...d.ventes.map((v) => ({ bandeId: v.bandeId as string | undefined,
       cle: 'v' + v.id, id: v.id, table: 'ventes' as const, date: v.date, creeLe: v.creeLe, qui: v.auteur, modifie: v.modifiePar,
-      texte: `Vente ${v.qte} × ${nombre(v.prixUnitaire)}${v.client ? ` à ${v.client}` : ''} · ${nomBande(v.bandeId)}${resteDu(v) ? ` · reste dû ${fcfa(resteDu(v))}` : ''}`,
+      texte: v.aucuneVente ? `Pas de vente ce jour · ${nomBande(v.bandeId)}` : `Vente ${v.qte} × ${nombre(v.prixUnitaire)}${v.client ? ` à ${v.client}` : ''} · ${nomBande(v.bandeId)}${resteDu(v) ? ` · reste dû ${fcfa(resteDu(v))}` : ''}`,
       montant: totalVente(v),
     })),
     ...d.depenses.map((x) => ({ bandeId: x.bandeId,
@@ -146,6 +146,7 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
               </span>
               <span className="droite">
                 {l.table === 'remises' ? <strong>{fcfa(d.remises.find((r) => r.id === l.id)!.montant)}</strong>
+                  : l.montant === 0 && l.table === 'ventes' ? <strong>—</strong>
                   : <strong className={l.montant < 0 ? 'negatif' : 'positif'}>{l.montant < 0 ? '−' : '+'}{fcfa(Math.abs(l.montant))}</strong>}
                 {gestion && estVerrouillee(d.bandes, l.bandeId) && <small className="verrou">bande clôturée</small>}
                 {gestion && !l.stock && !estVerrouillee(d.bandes, l.bandeId) && (
