@@ -1,3 +1,4 @@
+import { Calculator, ChevronLeft, Home, Link2, Package, PlusCircle, UserCheck, WifiOff } from 'lucide-react'
 import { corrigerRation180 } from './corrections'
 import BilanAnnuel from './screens/BilanAnnuel'
 import { useEffect, useState } from 'react'
@@ -89,8 +90,12 @@ export default function App() {
   return (
     <SessionContext.Provider value={utilisateur}>
       <header className="entete">
+        <svg className="entete-deco" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M260 92 C 290 40, 340 30, 352 36 C 344 70, 300 96, 260 92 Z" />
+          <path d="M300 112 C 318 84, 350 78, 362 82 C 352 104, 326 116, 300 112 Z" />
+        </svg>
         {pile.length > 1 ? (
-          <button className="retour" onClick={retour} aria-label="Retour">‹</button>
+          <button className="retour" onClick={retour} aria-label="Retour"><ChevronLeft size={30} /></button>
         ) : (
           <img src={`${import.meta.env.BASE_URL}logo-coq.png`} alt="" className="logo" />
         )}
@@ -101,6 +106,7 @@ export default function App() {
           </span>
         </div>
         <span className={`reseau ${!enLigne || synchro.etat === 'erreur' ? 'hors' : 'ok'}`} onClick={() => naviguer({ nom: 'plus' })}>
+          {!enLigne ? <WifiOff size={16} /> : <UserCheck size={16} />}
           {!enLigne ? 'Hors ligne' : !synchroActive ? 'En ligne'
             : synchro.etat === 'erreur' ? 'Pas synchronisé'
             : synchro.etat === 'en-cours' ? 'Envoi…'
@@ -129,13 +135,14 @@ export default function App() {
       </main>
       <nav className="barre">
         {([
-          ['accueil', 'Accueil'],
-          ['bandes', 'Bandes'],
-          ['caisse', 'Caisse'],
-          ['stock', 'Stock'],
-          ['plus', 'Plus'],
-        ] as const).map(([nom, libelle]) => (
+          ['accueil', 'Accueil', Home],
+          ['bandes', 'Bandes', Link2],
+          ['caisse', 'Caisse', Calculator],
+          ['stock', 'Stock', Package],
+          ['plus', 'Plus', PlusCircle],
+        ] as const).map(([nom, libelle, Icone]) => (
           <button key={nom} className={ecran.nom === nom ? 'actif' : ''} onClick={() => naviguer({ nom })}>
+            <Icone size={24} strokeWidth={ecran.nom === nom ? 2.4 : 1.8} />
             {libelle}
           </button>
         ))}
