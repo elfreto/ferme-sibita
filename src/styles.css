@@ -436,3 +436,106 @@ button.demarrer svg { width: 22px; height: 22px; }
 .tableau-bord .tuile { padding-right: 9px; }
 .tuile .fleche { top: auto; bottom: 8px; transform: none; right: 6px; }
 .tableau-bord .tuile .tuile-libelle { padding-right: 16px; }
+
+/* ===== Design commun à toutes les pages (même style que l'accueil) ===== */
+main { font-size: 0.9rem; }
+h1 { font-size: 1.15rem; color: var(--vert-fonce); }
+h2 { font-size: 1.02rem; }
+h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--vert); margin: 6px 0; }
+.petit { font-size: 0.78rem; }
+.sous-titre { font-size: 0.85rem; }
+.titre-page { display: flex; align-items: center; gap: 12px; }
+.titre-page > div { min-width: 0; flex: 1; }
+.titre-page h1 { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.titre-page p { margin: 2px 0 0; color: var(--doux); font-size: 0.8rem; line-height: 1.4; }
+.titre-page .etiquette { font-size: 0.68rem; }
+
+.carte { border-radius: 16px; box-shadow: var(--ombre); border-color: var(--bord); padding: 12px 14px; gap: 10px; }
+.carte h3 { margin-top: 0; }
+
+button.principal { border-radius: 24px; min-height: 46px; padding: 11px 16px; font-size: 0.95rem; background: linear-gradient(180deg, #23803f, var(--vert-fonce)); box-shadow: 0 3px 8px rgba(21, 90, 43, 0.25); }
+button.secondaire { border-radius: 24px; padding: 10px 14px; font-size: 0.9rem; border-width: 1.5px; background: #fff; }
+button.danger { border-radius: 24px; padding: 10px 14px; font-size: 0.9rem; background: #fff; }
+button.lien { font-size: 0.8rem; }
+
+.formulaire label, .formulaire fieldset { font-size: 0.85rem; gap: 5px; }
+.formulaire input, .formulaire select, .formulaire textarea { font-size: 0.95rem; padding: 10px 12px; min-height: 44px; border-radius: 12px; border-color: #d5ddd2; }
+.formulaire input:focus, .formulaire select:focus, .formulaire textarea:focus { outline: 2px solid var(--vert-vif); outline-offset: 0; border-color: transparent; }
+.formulaire label.case { font-weight: 500; }
+.formulaire label.case input { width: 20px; height: 20px; accent-color: var(--vert); }
+.segments button { border-radius: 22px; padding: 10px; font-size: 0.88rem; }
+.segments button.actif { background: var(--vert); border-color: var(--vert); }
+.compteur button { border-radius: 12px; }
+.info { border-radius: 12px; font-size: 0.85rem; padding: 10px 12px; background: var(--vert-fond); color: var(--vert-fonce); }
+.info.alerte { background: #fdf0d8; color: #b35a0c; }
+.erreur { font-size: 0.85rem; background: var(--rouge-fond); color: var(--rouge-vif); padding: 8px 12px; border-radius: 12px; }
+.champ-calcule { border-radius: 12px; background: var(--vert-fond); }
+.champ-calcule strong { font-size: 1.2rem; }
+
+.tableau { font-size: 0.8rem; border-radius: 14px; box-shadow: var(--ombre); }
+.tableau th { background: var(--vert-fond); color: var(--vert-fonce); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; padding: 8px 6px; border-bottom: 0; }
+.tableau td { padding: 8px 6px; border-bottom: 1px solid #eef1ec; }
+.tableau tr.manquant td { background: var(--rouge-fond); color: var(--rouge-vif); }
+.tableau tr.a-faire td { background: #fdf0d8; color: #b35a0c; }
+.graphique { border-radius: 14px; box-shadow: var(--ombre); border-color: var(--bord); }
+
+.chiffres > div { border-radius: 12px; background: var(--vert-fond); padding: 8px; }
+.chiffres strong { font-size: 0.98rem; color: var(--vert-fonce); }
+.chiffres span { font-size: 0.68rem; }
+.chiffres.grille > div { background: var(--vert-fond); border: 0; }
+.bilan { font-size: 13px; }
+
+.ligne-bande { border-radius: 16px; box-shadow: var(--ombre); padding: 12px 14px; font-size: 0.88rem; }
+.ligne-bande small { font-size: 0.75rem; }
+.acces { border-radius: 16px; border: 1px solid var(--vert-bord); font-size: 0.82rem; }
+.acces strong { color: var(--vert-fonce); }
+
+/* Caisse */
+.grosse-somme { background: linear-gradient(120deg, var(--vert-fonce), var(--vert) 60%, #2f8a3e); color: #fff; border: 0; }
+.grosse-somme span, .grosse-somme small { color: rgba(255,255,255,0.85); }
+.grosse-somme strong { color: #fff; font-size: 1.5rem; }
+.boutons-trois { gap: 8px; }
+button.action-caisse { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 16px; font-weight: 700; font-size: 0.85rem; box-shadow: var(--ombre); border: 1px solid; }
+button.action-caisse .pastille { width: 34px; height: 34px; color: #fff; }
+button.action-caisse.vert { background: var(--vert-fond); border-color: var(--vert-bord); color: var(--vert-tuile); }
+button.action-caisse.vert .pastille { background: var(--vert-tuile); }
+button.action-caisse.rouge { background: var(--rouge-fond); border-color: var(--rouge-bord); color: var(--rouge-vif); }
+button.action-caisse.rouge .pastille { background: var(--rouge-vif); }
+button.action-caisse.bleu { background: var(--bleu-fond); border-color: var(--bleu-bord); color: var(--bleu); }
+button.action-caisse.bleu .pastille { background: var(--bleu); }
+.liste-operations li { font-size: 0.82rem; padding: 9px 0; border-bottom-color: #eef1ec; }
+.liste-operations small { font-size: 0.72rem; }
+.a-confirmer { border: 1px solid #f4dcb0; background: #fdf0d8; }
+
+/* Stock */
+.stock-tete { align-items: center; }
+.stock-tete > span:nth-child(2) { flex: 1; min-width: 0; }
+.stock-tete .pastille { width: 38px; height: 38px; color: #fff; }
+.stock-tete .pastille.orange { background: var(--orange); }
+.stock-tete .pastille.rouge { background: var(--rouge-vif); }
+.stock-tete strong { font-size: 0.95rem; }
+.stock-tete small { font-size: 0.72rem; }
+.quantite strong { font-size: 1.35rem; color: var(--vert-fonce); }
+.carte.stock-bas { border-color: var(--rouge-bord); background: var(--rouge-fond); }
+.carte.stock-bas .quantite strong { color: var(--rouge-vif); }
+.tableau-stock td, .tableau-stock th { font-size: 11px; }
+
+/* Équipe, Plus, confirmations */
+.equipe .carte { gap: 8px; }
+.badge { font-size: 0.68rem; }
+.confirmer { border-radius: 18px; border-width: 1px; }
+.confirmer p { font-weight: 500; font-size: 0.88rem; }
+
+/* Connexion */
+.connexion { background: linear-gradient(180deg, #ffffff 0%, var(--fond) 100%); }
+button.gros { border-radius: 18px; box-shadow: var(--ombre); font-size: 1.05rem; padding: 12px; }
+.pave button { border-radius: 18px; box-shadow: var(--ombre); font-size: 1.25rem; height: 58px; }
+.points span.plein { background: var(--vert); }
+
+/* Corrections après relecture des écrans */
+.stock-tete > span:nth-child(2) { display: flex; flex-direction: column; }
+.filtre-bande { font-size: 0.85rem; }
+.filtre-bande select { font: inherit; font-weight: 400; font-size: 0.9rem; padding: 9px 12px; min-height: 42px; border: 1px solid #d5ddd2; border-radius: 12px; background: #fff; color: var(--texte); width: 100%; }
+.acces-liste dd { font-size: 0.8rem; color: var(--doux); }
+.equipe .segments button { font-size: 0.78rem; padding: 8px 6px; }
+.equipe-tete strong, .equipe-tete h3 { font-size: 0.95rem; }

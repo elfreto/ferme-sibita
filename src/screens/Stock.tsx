@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Package } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { MESSAGE_VERROU, enregistrer, estVerrouillee, nouvelId, payeeAvecVentes, peutGerer, peutSaisir, supprimer, type Categorie, type Mouvement, type TypeArticle } from '../db'
 import { aujourdhui, consommations, dateCourte, fcfa, nombre } from '../calc'
 import { useDonnees } from '../hooks'
@@ -28,7 +30,7 @@ export default function Stock({ naviguer }: { naviguer: Naviguer }) {
   const gestion = peutGerer(u)
   return (
     <div className="pile">
-      <h1>Stock</h1>
+      <TitrePage icone={<Package size={20} />} titre="Stock" />
       <p className="petit">L'aliment donné chaque jour (en kg) est retiré automatiquement, converti en sacs : d'abord de la Provende SPC, puis de la Provende maison quand la SPC est terminée.</p>
       <ul className="liste-stock">
         {d.articles.map((a) => {
@@ -39,6 +41,7 @@ export default function Stock({ naviguer }: { naviguer: Naviguer }) {
           return (
             <li key={a.id} className={`carte ${bas ? 'stock-bas' : ''}`}>
               <div className="stock-tete" onClick={() => setOuvert(ouvert === a.id ? null : a.id)}>
+                <span className={`pastille ${bas ? 'rouge' : 'orange'}`}><Package size={18} /></span>
                 <span>
                   <strong>{a.nom}</strong>
                   <small>{TYPES[a.type]}{a.poidsSacKg ? ` · sac de ${a.poidsSacKg} kg` : ''} · {seuil === undefined ? "pas d'alerte" : `alerte sous ${seuil} ${a.unite}s`}</small>
@@ -209,7 +212,7 @@ export function MouvementStock({ articleId, sens, mouvementId, onFini }: { artic
 
   return (
     <div className="pile formulaire">
-      <h1>{titre}</h1>
+      <TitrePage icone={<Package size={20} />} titre={titre} />
       <p className="sous-titre">{a.nom} · {nombre(actuel, 1)} {a.unite}s en stock d'après l'application</p>
       {fabrication && <p className="info">Sacs de provende fabriqués à la ferme. 1 sac de maïs est retiré pour {SACS_MAISON_PAR_SAC_MAIS} sacs entrés. Les ingrédients sont déjà comptés dans les dépenses, il n'y a donc pas de prix à saisir.</p>}
       {sens === 'inventaire' && <p className="info">Comptez ce qu'il y a vraiment dans le magasin. Le stock repartira de ce nombre.</p>}

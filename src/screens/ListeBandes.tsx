@@ -1,4 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Link2 } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { db, dirigeLesBandes, voitLesBilans, type Bande } from '../db'
 import { dateCourte, fcfa, nombre } from '../calc'
 import { useUtilisateur } from '../session'
@@ -13,7 +15,7 @@ export default function ListeBandes({ naviguer }: { naviguer: Naviguer }) {
   const closes = tri.filter((b) => b.statut === 'cloturee')
   return (
     <div className="pile">
-      <h1>Bandes</h1>
+      <TitrePage icone={<Link2 size={20} />} titre="Bandes" />
       {dirigeLesBandes(u) && enCours.length < 2 && (
         <button className="secondaire" onClick={() => naviguer({ nom: 'nouvelle-bande' })}>Démarrer une bande</button>
       )}

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, enregistrer, nouvelId } from '../db'
 import { aujourdhui } from '../calc'
@@ -40,7 +42,7 @@ export default function NouvelleBande({ espace: espaceInitial, onFini }: { espac
 
   return (
     <div className="pile formulaire">
-      <h1>Nouvelle bande</h1>
+      <TitrePage icone={<Plus size={20} />} titre="Nouvelle bande" />
       <fieldset>
         <legend>Espace du bâtiment</legend>
         <div className="segments">

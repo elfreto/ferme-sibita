@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { UserRound } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ACCES_ROLE, LIBELLE_ROLE, compterDonnees, db, dirigeLesBandes, effacerToutesLesDonnees, gereLesComptes, importerHistorique, type Historique } from '../db'
 import { dateCourte } from '../calc'
@@ -53,7 +55,7 @@ export default function Plus({ naviguer, onQuitter }: { naviguer: Naviguer; onQu
   const heure = s.derniere ? `${dateCourte(s.derniere.slice(0, 10))} à ${new Date(s.derniere).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}` : undefined
   return (
     <div className="pile">
-      <h1>{u.nom}</h1>
+      <TitrePage icone={<UserRound size={20} />} titre={u.nom} />
       <div className={`acces ${u.role}`}>
         <strong>Votre accès : {LIBELLE_ROLE[u.role]}</strong>
         <span>{ACCES_ROLE[u.role]}</span>

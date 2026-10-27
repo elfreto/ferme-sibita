@@ -1,4 +1,6 @@
 import { Fragment, useState } from 'react'
+import { Sprout } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { CATEGORIES, apresCloture, cloturerBande, db, dirigeLesBandes, enregistrer, peutGerer, peutSaisir, supprimer, supprimerBande, voitLesBilans, type Categorie } from '../db'
 import { MOIS } from './NouvelleBande'
 import type { Bilan } from '../argent'
@@ -111,13 +113,12 @@ export default function FicheBande({ bandeId, naviguer }: { bandeId: string; nav
   return (
     <div className="pile">
       <div>
-        <span className="etiquette">Espace {bande.espace} · {bande.statut === 'en_cours' ? 'en cours' : 'clôturée'}</span>
-        <h1>{bande.nom}</h1>
-        <p className="sous-titre">
+        <TitrePage icone={<Sprout size={20} />} titre={bande.nom} sousTitre={<>
+          <span className="etiquette">Espace {bande.espace} · {bande.statut === 'en_cours' ? 'en cours' : 'clôturée'}</span><br />
           {nombre(bande.poussins)} poussins reçus le {dateLongue(bande.dateReception)}
           {bande.responsable ? ` · responsable ${bande.responsable}` : ''}
           {dirigeLesBandes(u) && nouvelleDate === null && <> · <button className="lien" onClick={() => setNouvelleDate(bande.dateReception)}>Changer la date</button></>}
-        </p>
+        </>} />
         {nouvelleDate !== null && (
           <div className="carte pile">
             <label>

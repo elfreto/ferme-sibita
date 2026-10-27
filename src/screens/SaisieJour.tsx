@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { ClipboardPen } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { CHAMPS_SAISIE, champsEnRouge, db, enregistrer, nouvelId, peutGerer, peutSaisir, type Saisie } from '../db'
 import { age, alimentPrevuKg, aujourdhui, dateCourte, dateLongue, gramme, nombre, rationPrevue } from '../calc'
@@ -118,8 +120,7 @@ export default function SaisieJour({ bandeId, dateInitiale, saisieId, onFini }: 
 
   return (
     <div className="pile formulaire">
-      <h1>{bande.nom}</h1>
-      <p className="sous-titre">Espace {bande.espace} · J{ageJour} · {nombre(vivantsAvant)} vivants</p>
+      <TitrePage icone={<ClipboardPen size={20} />} titre={bande.nom} sousTitre={`Espace ${bande.espace} · J${ageJour} · ${nombre(vivantsAvant)} vivants`} />
 
       {original && <p className="info alerte">Correction d'une saisie de {original.auteur ?? 'inconnu'}. Les valeurs changées apparaîtront en rouge.</p>}
       {gestion && !original ? (

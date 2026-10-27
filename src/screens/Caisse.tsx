@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { ArrowRightLeft, Calculator, Receipt, ShoppingCart } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { LIBELLE_ROLE, CATEGORIES, enregistrer, estVerrouillee, payeeAvecVentes, peutGerer, peutSaisir, supprimer, versementEnAttente, voitLesBilans, type Remise, type Vente } from '../db'
 import { argentEnMain, resteDu, totalVente } from '../argent'
 import { aujourdhui, dateCourte, fcfa, nombre } from '../calc'
@@ -54,7 +56,7 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
 
   return (
     <div className="pile">
-      <h1>Caisse</h1>
+      <TitrePage icone={<Calculator size={20} />} titre="Caisse" />
       {u.role !== 'lecteur' && (u.role !== 'cofondateur' || moi) && (
         <section className="carte grosse-somme">
           <span>Argent des ventes que vous avez en main</span>
@@ -81,9 +83,9 @@ export default function Caisse({ naviguer }: { naviguer: Naviguer }) {
 
       {peutSaisir(u) && (
         <div className="boutons-trois">
-          <button className="principal" onClick={() => naviguer({ nom: 'vente' })}>Vente</button>
-          <button className="secondaire" onClick={() => naviguer({ nom: 'depense' })}>Dépense</button>
-          <button className="secondaire" onClick={() => naviguer({ nom: 'versement' })}>Versement</button>
+          <button className="action-caisse vert" onClick={() => naviguer({ nom: 'vente' })}><span className="pastille"><ShoppingCart size={18} /></span>Vente</button>
+          <button className="action-caisse rouge" onClick={() => naviguer({ nom: 'depense' })}><span className="pastille"><Receipt size={18} /></span>Dépense</button>
+          <button className="action-caisse bleu" onClick={() => naviguer({ nom: 'versement' })}><span className="pastille"><ArrowRightLeft size={18} /></span>Versement</button>
         </div>
       )}
 

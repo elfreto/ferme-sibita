@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { ArrowRightLeft, HandCoins, Receipt, ShoppingCart } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { CATEGORIES, MESSAGE_VERROU, enregistrer, estVerrouillee, nouvelId, payeeAvecVentes, peutGerer, type Categorie, type Depense, type Remise, type Vente, versementEnAttente } from '../db'
 import { argentEnMain, resteDu, totalVente } from '../argent'
 import { aujourdhui, dateCourte, fcfa, journees, nombre, resume } from '../calc'
@@ -119,7 +121,7 @@ export function NouvelleVente({ editId, onFini }: { editId?: string; onFini: () 
 
   return (
     <div className="pile formulaire">
-      <h1>{existant ? 'Modifier la vente' : 'Nouvelle vente'}</h1>
+      <TitrePage icone={<ShoppingCart size={20} />} titre={existant ? 'Modifier la vente' : 'Nouvelle vente'} />
       {enCours.length > 1 ? (
         <fieldset>
           <legend>Bande</legend>
@@ -237,7 +239,7 @@ export function NouvelleDepense({ editId, onFini }: { editId?: string; onFini: (
 
   return (
     <div className="pile formulaire">
-      <h1>{existant ? 'Modifier la dépense' : 'Nouvelle dépense'}</h1>
+      <TitrePage icone={<Receipt size={20} />} titre={existant ? 'Modifier la dépense' : 'Nouvelle dépense'} />
       {!gestion && <p className="info">Petite dépense payée avec l'argent des ventes (transport, fiches, ticket marché…). Vous avez {fcfa(enMain)} en main.</p>}
       <ChampDate date={date} setDate={setDate} />
       <label>
@@ -332,7 +334,7 @@ export function NouveauVersement({ editId, onFini }: { editId?: string; onFini: 
 
   return (
     <div className="pile formulaire">
-      <h1>{existant ? 'Modifier le versement' : 'Versement'}</h1>
+      <TitrePage icone={<ArrowRightLeft size={20} />} titre={existant ? 'Modifier le versement' : 'Versement'} />
       {existant && <p className="info">Si vous changez qui verse, qui reçoit ou le montant, le versement devra être confirmé à nouveau.</p>}
       <p className="petit">L'argent des ventes passe d'une personne à une autre, en général au chef d'exploitation. Il ne sort de la caisse que lorsque la personne qui le reçoit confirme dans l'application.</p>
       <ChampDate date={date} setDate={setDate} />
@@ -383,7 +385,7 @@ export function Reglement({ venteId, onFini }: { venteId: string; onFini: () => 
 
   return (
     <div className="pile formulaire">
-      <h1>Encaisser une dette</h1>
+      <TitrePage icone={<HandCoins size={20} />} titre="Encaisser une dette" />
       <p className="sous-titre">{v.client ?? 'Client sans nom'} · vente du {v.date} · {v.qte} poulets pour {fcfa(totalVente(v))}</p>
       <p className="info">Reste dû : <strong>{fcfa(reste)}</strong></p>
       <label>

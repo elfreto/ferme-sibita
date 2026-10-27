@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { BarChart3 } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Mouvement } from '../db'
 import { aujourdhui, fcfa, journees, nombre, resume } from '../calc'
@@ -71,7 +73,7 @@ export default function BilanAnnuel({ naviguer }: { naviguer: Naviguer }) {
   }
   return (
     <div className="pile">
-      <h1>Tableau de bord annuel</h1>
+      <TitrePage icone={<BarChart3 size={20} />} titre="Tableau de bord annuel" />
       <label className="filtre-bande">
         Année
         <select id="annee" value={annee} onChange={(e) => setAnnee(e.target.value)}>

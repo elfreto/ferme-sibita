@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Users } from 'lucide-react'
+import TitrePage from '../TitrePage'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ACCES_ROLE, LIBELLE_ROLE, ROLES, db, enregistrer, gereLesComptes, modifier, nouvelId, ordreRole, type Role, type Utilisateur } from '../db'
 import { useUtilisateur } from '../session'
@@ -47,7 +49,7 @@ export default function Equipe() {
 
   return (
     <div className="pile formulaire">
-      <h1>Équipe</h1>
+      <TitrePage icone={<Users size={20} />} titre="Équipe" />
       {message && <p className="info">{message}</p>}
 
       <section>
