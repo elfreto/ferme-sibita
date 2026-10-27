@@ -62,7 +62,7 @@ function TableauDeBord({ naviguer }: { naviguer: Naviguer }) {
   return (
     <div className="tableau-bord">
       {alerte}
-      <Tuile teinte="bleu" icone={<Users size={22} />} valeur={fcfa(chezEquipe)} libelle="ventes chez l'équipe" onClick={() => naviguer({ nom: 'caisse' })} />
+      <Tuile teinte="bleu" icone={<Users size={22} />} valeur={fcfa(chezEquipe)} libelle="argent ventes chez l'équipe" onClick={() => naviguer({ nom: 'caisse' })} />
       <Tuile teinte="vert" icone={<User size={22} />} valeur={fcfa(dettes)} libelle="dettes des clients" onClick={() => naviguer({ nom: 'caisse' })} />
       {tuileStock}
       <Tuile teinte={resultat < 0 ? 'rouge' : 'vert'} icone={<Database size={22} />} valeur={fcfa(resultat)} libelle="résultat bandes en cours" onClick={() => naviguer({ nom: 'bandes' })} />
