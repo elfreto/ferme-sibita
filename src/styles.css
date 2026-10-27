@@ -370,3 +370,69 @@ button.principal.grand { display: flex; align-items: center; justify-content: ce
 .indicateurs span:not(.pastille) { font-size: 0.72rem; line-height: 1.2; }
 .tableau-bord { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .tuile-haut strong { white-space: normal; min-width: 0; }
+/* Accueil plus compact : la plupart des textes tiennent sur une ligne */
+.entete .titre strong { font-size: 1.02rem; }
+.entete .titre span { font-size: 0.75rem; }
+.entete .logo { width: 44px; height: 44px; border-radius: 12px; }
+.reseau { font-size: 0.75rem; padding: 5px 10px; gap: 5px; }
+.reseau svg { width: 14px; height: 14px; }
+.barre button { font-size: 0.75rem; }
+.barre button svg { width: 22px; height: 22px; }
+.accueil { font-size: 0.875rem; gap: 12px; }
+.accueil .date-jour { font-size: 0.95rem; gap: 10px; }
+.accueil .date-jour svg { width: 22px; height: 22px; }
+.accueil .acces { padding: 10px 12px; gap: 12px; }
+.accueil .acces strong { font-size: 0.9rem; }
+.accueil .acces span:not(.pastille) { font-size: 0.78rem; line-height: 1.35; }
+.accueil .acces .pastille { width: 40px; height: 40px; }
+.accueil .acces .pastille svg { width: 22px; height: 22px; }
+.tableau-bord { gap: 10px; }
+.tableau-bord .tuile { padding: 10px; gap: 6px; border-radius: 14px; }
+.tuile-haut { gap: 8px; }
+.tuile-haut strong { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tuile .pastille { width: 32px; height: 32px; }
+.tuile .pastille svg { width: 17px; height: 17px; }
+.tuile .fleche { width: 16px; height: 16px; }
+.tableau-bord .tuile .tuile-libelle { font-size: 0.7rem; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.bande-tete { padding: 12px 14px; gap: 12px; }
+.bande-tete .pastille { width: 42px; height: 42px; }
+.bande-tete .pastille svg { width: 22px; height: 22px; }
+.bande-titre span { font-size: 0.7rem; }
+.bande-titre h2 { font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bande-titre { min-width: 0; }
+.bande-tete .age { padding: 4px 12px; border-radius: 12px; }
+.bande-tete .age strong { font-size: 1.2rem; }
+.bande-tete .age span { font-size: 0.7rem; }
+.bande-corps { gap: 10px; padding: 12px; }
+.indicateurs { gap: 6px; }
+.indicateurs > div { padding: 8px 6px; gap: 6px; }
+.indicateurs .pastille { width: 26px; height: 26px; }
+.indicateurs .pastille svg { width: 14px; height: 14px; }
+.indicateurs strong { font-size: 0.95rem; }
+.indicateurs span:not(.pastille) { font-size: 0.66rem; white-space: nowrap; }
+.accueil .aujourdhui { font-size: 0.82rem; padding: 10px 12px; gap: 8px; }
+.accueil .aujourdhui svg { width: 18px; height: 18px; flex: none; }
+button.principal.grand { min-height: 48px; font-size: 0.95rem; gap: 10px; }
+button.principal.grand svg { width: 18px; height: 18px; }
+.espace-vide { padding: 12px 14px; }
+.espace-tete { gap: 12px; }
+.espace-tete h2 { font-size: 1.05rem; }
+.espace-tete p { font-size: 0.82rem; margin-top: 2px; }
+.pastille.pleine { width: 40px; height: 40px; }
+.pastille.pleine svg { width: 20px; height: 20px; }
+button.demarrer { padding: 12px; font-size: 0.92rem; }
+button.demarrer svg { width: 22px; height: 22px; }
+.tuile-haut strong { font-size: 0.86rem; overflow: visible; text-overflow: clip; letter-spacing: -0.01em; }
+.tuile .fleche { margin-left: auto; }
+.tableau-bord .tuile { position: relative; padding-right: 22px; }
+.tuile .fleche { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); margin: 0; }
+.tuile .pastille { width: 30px; height: 30px; }
+.tuile .pastille svg { width: 16px; height: 16px; }
+.tuile-haut { gap: 7px; }
+.tuile-haut strong { font-size: 0.84rem; }
+.tuile-haut strong { font-size: 0.78rem; letter-spacing: -0.02em; }
+.tableau-bord .tuile { padding-left: 9px; padding-right: 20px; }
+.tuile .fleche { right: 4px; }
+.tableau-bord .tuile { padding-right: 9px; }
+.tuile .fleche { top: auto; bottom: 8px; transform: none; right: 6px; }
+.tableau-bord .tuile .tuile-libelle { padding-right: 16px; }
