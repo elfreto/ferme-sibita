@@ -11,14 +11,33 @@
   p { font-size: 17px; line-height: 1.5; }
   button { margin-top: 16px; font-size: 18px; padding: 14px 28px; border: 0; border-radius: 10px;
            background: #2f6b3a; color: #fff; }
+  button.second { background: #fff; color: #2f6b3a; border: 2px solid #2f6b3a; font-size: 16px; padding: 10px 20px; }
+  .detail { font-size: 13px; color: #777; margin-top: 24px; word-break: break-word; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Pas de connexion</h1>
-  <p>La toute première ouverture de l'application demande internet.</p>
-  <p>Ensuite, elle marche aussi sans connexion.</p>
-  <button onclick="location.href='https://elfreto.github.io/ferme-sibita/'">Réessayer</button>
+  <h1>Site injoignable</h1>
+  <p>Le téléphone n'arrive pas à joindre le site de la ferme. La toute première ouverture demande internet ; ensuite, l'application marche aussi sans connexion.</p>
+  <p id="essai">Nouvel essai automatique dans <span id="compte">10</span> s…</p>
+  <button onclick="reessayer()">Réessayer</button><br>
+  <button class="second" onclick="SibitaAndroid.ouvrirNavigateur()">Tester dans Chrome</button>
+  <p class="detail" id="detail"></p>
 </main>
+<script>
+  var ADRESSE = 'https://elfreto.github.io/ferme-sibita/';
+  function reessayer() { location.href = ADRESSE; }
+  // L'erreur exacte (envoyée par l'application) aide à trouver la cause
+  var params = new URLSearchParams(location.search);
+  if (params.get('detail')) {
+    document.getElementById('detail').textContent = 'Erreur : ' + params.get('detail') + ' (' + params.get('code') + ')';
+  }
+  var reste = 10;
+  setInterval(function () {
+    reste--;
+    if (reste <= 0) return reessayer();
+    document.getElementById('compte').textContent = reste;
+  }, 1000);
+</script>
 </body>
 </html>

@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
         reglages.setMediaPlaybackRequiresUserGesture(false);
         // Texte un peu plus petit, et le même sur tous les téléphones (ignore la grande police du système)
         reglages.setTextZoom(85);
-        reglages.setUserAgentString(reglages.getUserAgentString() + " SibitaAndroid/1.1");
+        reglages.setUserAgentString(reglages.getUserAgentString() + " SibitaAndroid/1.2");
 
         web.addJavascriptInterface(new Pont(), "SibitaAndroid");
 
@@ -109,9 +109,10 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedError(WebView vue, WebResourceRequest requete, WebResourceError erreur) {
-                // Première ouverture sans internet : rien en mémoire, on explique
+                // Site injoignable et rien en mémoire : on explique, avec l'erreur exacte pour comprendre
                 if (requete.isForMainFrame() && requete.getUrl().toString().startsWith(ADRESSE)) {
-                    vue.loadUrl(PAGE_HORS_LIGNE);
+                    vue.loadUrl(PAGE_HORS_LIGNE + "?code=" + erreur.getErrorCode()
+                        + "&detail=" + Uri.encode(String.valueOf(erreur.getDescription())));
                 }
             }
         });
@@ -183,6 +184,12 @@ public class MainActivity extends Activity {
 
     /** Appelé depuis la page pour enregistrer un fichier puis proposer de le partager (WhatsApp, etc.). */
     private class Pont {
+        /** Depuis la page « Pas de connexion » : ouvrir le site dans Chrome pour tester le réseau. */
+        @JavascriptInterface
+        public void ouvrirNavigateur() {
+            runOnUiThread(() -> ouvrirAilleurs(Uri.parse(ADRESSE)));
+        }
+
         @JavascriptInterface
         public void enregistrer(String dataUrl, String nom, String type) {
             try {
