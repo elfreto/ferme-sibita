@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Sibita" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">#2f6b3a</item>
+        <item name="android:colorPrimaryDark">#2f6b3a</item>
+        <item name="android:colorAccent">#2f6b3a</item>
+        <item name="android:statusBarColor">#2f6b3a</item>
+        <item name="android:windowBackground">#f6f3ea</item>
+    </style>
+</resources>

@@ -1,0 +1,32 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.elfreto.fermesibita'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.elfreto.fermesibita'
+        minSdk 24
+        targetSdk 35
+        versionCode 2
+        versionName '1.1'
+    }
+
+    buildTypes {
+        release {
+            // Signé après la compilation (voir android/LISEZMOI.md)
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+}
