@@ -1,6 +1,6 @@
 # Application Android
 
-Petite enveloppe qui affiche le site en ligne (https://elfreto.github.io/ferme-sibita/).
+Petite enveloppe qui affiche le site en ligne (https://ferme-sibita.pages.dev/).
 Les mises à jour du site arrivent donc toutes seules dans l'application, et la saisie
 hors ligne marche comme dans le navigateur (service worker + IndexedDB).
 Les fichiers Excel exportés sont enregistrés dans Téléchargements (Android 10 et plus)

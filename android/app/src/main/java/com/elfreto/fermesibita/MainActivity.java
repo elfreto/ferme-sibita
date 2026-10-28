@@ -37,7 +37,7 @@ import java.io.OutputStream;
  */
 public class MainActivity extends Activity {
 
-    private static final String ADRESSE = "https://elfreto.github.io/ferme-sibita/";
+    private static final String ADRESSE = "https://ferme-sibita.pages.dev/";
     private static final String PAGE_HORS_LIGNE = "file:///android_asset/hors-ligne.html";
     private static final int CHOIX_FICHIER = 1;
 
