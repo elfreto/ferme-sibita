@@ -1,4 +1,7 @@
-name: Publier l'application
+# L'application est publiée par Cloudflare Pages (https://ferme-sibita.pages.dev) :
+# github.io est bloqué sur certains réseaux camerounais. GitHub Pages ne garde qu'une page
+# qui renvoie vers la nouvelle adresse ; ce workflow lance aussi les tests.
+name: Tests et redirection GitHub Pages
 
 on:
   push:
@@ -28,11 +31,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      # Adresse et clé publique Supabase : dans .env.production
-      - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: redirection
       - id: deploiement
         uses: actions/deploy-pages@v4
