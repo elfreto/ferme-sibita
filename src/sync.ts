@@ -1,4 +1,4 @@
-import { corrigerRation180 } from './corrections'
+import { corrigerRation139 } from './corrections'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { db, TABLES_PARTAGEES, type Envoi } from './db'
@@ -150,7 +150,7 @@ export async function lancerSynchro() {
   publier({ etat: 'en-cours' })
   try {
     await synchroniser(serveurSupabase(supabase))
-    if (await corrigerRation180()) await synchroniser(serveurSupabase(supabase))
+    if (await corrigerRation139()) await synchroniser(serveurSupabase(supabase))
     publier({ etat: 'ok', derniere: new Date().toISOString(), message: undefined, enAttente: await db.envois.count() })
   } catch (e) {
     publier({ etat: navigator.onLine ? 'erreur' : 'hors-ligne', message: e instanceof Error ? e.message : String(e), enAttente: await db.envois.count() })

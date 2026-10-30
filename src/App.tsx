@@ -1,5 +1,5 @@
 import { Calculator, ChevronLeft, Home, Link2, Package, PlusCircle, UserCheck, WifiOff } from 'lucide-react'
-import { corrigerRation180 } from './corrections'
+import { corrigerRation139 } from './corrections'
 import BilanAnnuel from './screens/BilanAnnuel'
 import { useEffect, useState } from 'react'
 import { LIBELLE_ROLE, dirigeLesBandes, initialiser, type Mouvement, type Utilisateur } from './db'
@@ -52,7 +52,7 @@ export default function App() {
       if (!data.session && !error) setFermeReliee(false)
     })
     initialiser()
-      .then(() => (synchroActive ? undefined : corrigerRation180()))
+      .then(() => (synchroActive ? undefined : corrigerRation139()))
       .then(utilisateurMemorise)
       .then((u) => setUtilisateur(u ?? null))
       .finally(() => setPret(true))

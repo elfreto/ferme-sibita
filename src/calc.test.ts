@@ -15,7 +15,7 @@ describe('calculs', () => {
   })
 
   it('reprend la ration prévue de la fiche', () => {
-    expect([1, 8, 15, 22, 29, 36, 42, 43, 60].map(rationPrevue)).toEqual([25, 40, 62, 85, 110, 139, 139, 180, 180])
+    expect([1, 8, 15, 22, 29, 36, 42, 43, 60].map(rationPrevue)).toEqual([25, 40, 62, 85, 110, 139, 139, 139, 139])
   })
 
   it('additionne plusieurs distributions le même jour', () => {

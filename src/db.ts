@@ -82,6 +82,8 @@ export interface Saisie {
   alimentArticleId?: string
   /** Aliment recalculé de 183 g à 180 g par poulet (jours après J42 saisis avant le 23/10/2026) */
   ration180?: true
+  /** Aliment recalculé à 139 g par poulet (jours après J42 saisis avec 183 g ou 180 g, avant le 30/10/2026) */
+  ration139?: true
   /** Corrections faites par un co-founder ou un responsable : anciennes valeurs, qui et quand */
   modifications?: { le: string; par: string; avant: Partial<Saisie> }[]
 }
