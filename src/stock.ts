@@ -3,12 +3,8 @@ import type { Article, Mouvement } from './db'
 export const PROVENDE_SPC = 'provende-spc'
 export const PROVENDE_MAISON = 'aliment-fini' // ancien « Aliment fini », même identifiant pour garder son historique
 export const MAIS = 'mais'
-/** Sacs de provende maison fabriqués avec un sac de maïs (4 depuis le 27/11/2026, demande de Justin). */
+/** Sacs de provende maison fabriqués avec un sac de maïs (4 depuis le 27/11/2026, appliqué aussi aux anciennes entrées). */
 export const SACS_MAISON_PAR_SAC_MAIS = 4
-/** Les entrées datées d'avant ce jour gardent l'ancienne règle : 1 sac de maïs pour 3 sacs. */
-export const DEBUT_REGLE_4_SACS = '2026-11-27'
-const ANCIEN_SACS_MAISON_PAR_SAC_MAIS = 3
-export const sacsMaisonParSacMais = (date: string) => (date < DEBUT_REGLE_4_SACS ? ANCIEN_SACS_MAISON_PAR_SAC_MAIS : SACS_MAISON_PAR_SAC_MAIS)
 const POIDS_SAC_DEFAUT = 50
 
 /** Seuils d'alerte fixés par Justin : aucune alerte pour la SPC. */
@@ -31,8 +27,7 @@ type Evenement = { cle: string; mouvement?: Mouvement; kg?: number }
  * - un inventaire remet le compte au nombre compté ;
  * - l'aliment donné chaque jour (kg, voir consommations) est retiré d'abord de la Provende SPC,
  *   puis, quand elle est épuisée, de la Provende maison ;
- * - chaque entrée de Provende maison retire 1 sac de maïs pour 4 sacs entrés (20 sacs → 5 sacs de maïs) ;
- *   les entrées datées d'avant le 27/11/2026 gardent 1 sac pour 3.
+ * - chaque entrée de Provende maison retire 1 sac de maïs pour 4 sacs entrés (20 sacs → 5 sacs de maïs), anciennes entrées comprises.
  */
 export function etatStocks(articles: Article[], mouvements: Mouvement[], consommations: { date: string; creeLe?: string; alimentKg: number }[]): Map<string, number> {
   const q = new Map<string, number>(articles.map((a) => [a.id, 0]))
@@ -50,7 +45,7 @@ export function etatStocks(articles: Article[], mouvements: Mouvement[], consomm
       if (m.sens === 'sortie') ajouter(m.articleId, -m.quantite)
       if (m.sens === 'entree') {
         ajouter(m.articleId, m.quantite)
-        if (m.articleId === PROVENDE_MAISON) ajouter(MAIS, -m.quantite / sacsMaisonParSacMais(m.date))
+        if (m.articleId === PROVENDE_MAISON) ajouter(MAIS, -m.quantite / SACS_MAISON_PAR_SAC_MAIS)
       }
     } else if (e.kg) {
       const spcDispo = Math.max(0, q.get(PROVENDE_SPC) ?? 0)
