@@ -66,15 +66,8 @@ describe('stock', () => {
     expect(s.get('aliment-fini')).toBe(9.5)
   })
 
-  it('retire 1 sac de maïs pour 3 sacs de provende maison entrés', () => {
-    const m = [mvt('mais', 'entree', 10, '2026-10-20'), mvt('aliment-fini', 'entree', 15, '2026-10-21')]
-    const s = etatStocks(articles, m, [jour('2026-10-22', 150)])
-    expect(s.get('mais')).toBe(5)
-    expect(s.get('aliment-fini')).toBe(12)
-  })
-
-  it('retire 1 sac de maïs pour 4 sacs de provende maison entrés à partir du 27/11/2026', () => {
-    const m = [mvt('mais', 'entree', 10, '2026-11-20'), mvt('aliment-fini', 'entree', 20, '2026-11-27')]
+  it('retire 1 sac de maïs pour 4 sacs de provende maison entrés', () => {
+    const m = [mvt('mais', 'entree', 10, '2026-10-20'), mvt('aliment-fini', 'entree', 20, '2026-10-21')]
     const s = etatStocks(articles, m, [])
     expect(s.get('mais')).toBe(5)
   })
